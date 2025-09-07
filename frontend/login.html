@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YpeTec — Login</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <style>
+    :root{
+      --brand-yellow:#ffd400; --brand-yellow-600:#f2c200; --brand-yellow-700:#e3b400;
+      --brand-black:#0a0a0a; --ring: rgba(255,255,255,.1);
+      --ink-1:#fff; --ink-2:#e5e7eb; --ink-3:#cbd5e1;
+    }
+
+    body{
+      min-height:100vh; margin:0;
+      background:#0a0a0a;
+      background-image:
+        radial-gradient(900px 600px at 12% 10%, rgba(255,212,0,.12), transparent 60%),
+        radial-gradient(900px 600px at 90% -10%, rgba(255,255,255,.06), transparent 55%);
+      color:var(--ink-2);
+      display:flex; flex-direction:column;
+    }
+
+    /* Navbar */
+    .navbar{ background:var(--brand-black); border-bottom:3px solid var(--brand-yellow); }
+    .navbar .navbar-brand, .navbar .nav-link{ color:#fff!important; }
+    .navbar .brand-logo{ height:40px; }
+
+    /* Card */
+    .auth-card{
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--ring);
+      border-radius:16px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color:#fff;
+    }
+    .form-label{ color:#e5e7eb; }
+    .form-control{
+      background:#111; border:1px solid rgba(255,255,255,.18); color:#fff;
+    }
+    .form-control:focus{ border-color: var(--brand-yellow); box-shadow: 0 0 0 .2rem rgba(255,212,0,.15); }
+
+    .btn-brand{
+      background: linear-gradient(90deg, var(--brand-yellow), var(--brand-yellow-600));
+      border:0; color:#111; font-weight:700;
+    }
+    .btn-brand:hover{ background: linear-gradient(90deg, var(--brand-yellow-600), var(--brand-yellow-700)); }
+
+    .muted a{ color:var(--ink-3); text-decoration:none; }
+    .muted a:hover{ color:#fff; text-decoration:underline; }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container py-2 d-flex align-items-center justify-content-between">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+        <!-- Use sua imagem se quiser -->
+        <!-- <img src="img/logo.jpg" class="brand-logo" alt="YpeTec"> -->
+         <img src="img/logo.png" alt="YpeTec" height="60" class="d-inline-block">
+        
+        
+      </a>
+      <a href="index.html" class="btn btn-sm" style="color:#fff"><i class="bi bi-arrow-left"></i> Voltar</a>
+    </div>
+  </nav>
+
+  <!-- Conteúdo -->
+  <main class="container my-5 flex-grow-1 d-flex align-items-center justify-content-center">
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="auth-card p-4 p-md-5 shadow-sm">
+        <h4 class="fw-bold mb-1">Acessar conta</h4>
+        <p class="text-secondary mb-4" style="color:#cbd5e1!important;">Entre com seu CPF e senha para continuar.</p>
+
+        <form id="loginForm" novalidate>
+          <div class="mb-3">
+            <label class="form-label">CPF</label>
+            <input type="text" class="form-control" name="cpf" inputmode="numeric" autocomplete="username"
+                   placeholder="000.000.000-00" maxlength="14" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label d-flex justify-content-between align-items-center">
+              <span>Senha</span>
+              <button type="button" id="togglePwd" class="btn btn-sm btn-outline-light" style="border-color:rgba(255,255,255,.25);">
+                <i class="bi bi-eye"></i>
+              </button>
+            </label>
+            <input type="password" class="form-control" name="password" autocomplete="current-password" required>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="rememberChk">
+              <label class="form-check-label" for="rememberChk">Lembrar-me</label>
+            </div>
+            <a href="#" class="small" style="color:#ffd400">Esqueceu a senha?</a>
+          </div>
+
+          <button class="btn btn-brand w-100 py-2" id="loginBtn">
+            <span class="normal"><i class="bi bi-box-arrow-in-right"></i> Entrar</span>
+            <span class="loading d-none"><span class="spinner-border spinner-border-sm me-2"></span>Entrando…</span>
+          </button>
+        </form>
+
+        <div id="loginMsg" class="small mt-3 text-warning" role="alert"></div>
+      </div>
+
+      <p class="text-center muted mt-3">
+        <a href="index.html"><i class="bi bi-house-door"></i> Ir para a página inicial</a>
+      </p>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Máscara de CPF (exibição) + sanitização (envio)
+    const cpfInput = document.querySelector('input[name="cpf"]');
+    cpfInput.addEventListener('input', () => {
+      let v = cpfInput.value.replace(/\D/g,'').slice(0,11);
+      if (v.length > 9) cpfInput.value = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, "$1.$2.$3-$4");
+      else if (v.length > 6) cpfInput.value = v.replace(/(\d{3})(\d{3})(\d{0,3})/, "$1.$2.$3");
+      else if (v.length > 3) cpfInput.value = v.replace(/(\d{3})(\d{0,3})/, "$1.$2");
+      else cpfInput.value = v;
+    });
+
+    // Mostrar/ocultar senha
+    const pwdInput = document.querySelector('input[name="password"]');
+    document.getElementById('togglePwd').addEventListener('click', () => {
+      const isPwd = pwdInput.type === 'password';
+      pwdInput.type = isPwd ? 'text' : 'password';
+      document.querySelector('#togglePwd i').className = isPwd ? 'bi bi-eye-slash' : 'bi bi-eye';
+    });
+
+    // Integra com seu app.js (bindLogin) e garante que o CPF vai sem pontuação
+    function wrapBindLogin() {
+      const form = document.getElementById('loginForm');
+      const btn  = document.getElementById('loginBtn');
+      const msg  = document.getElementById('loginMsg');
+
+      form.addEventListener('submit', () => {
+        // tira máscara antes do fetch do bindLogin
+        const raw = cpfInput.value.replace(/\D/g,'');
+        cpfInput.value = raw;
+        // UI loading
+        btn.disabled = true;
+        btn.querySelector('.normal').classList.add('d-none');
+        btn.querySelector('.loading').classList.remove('d-none');
+      });
+
+      // Opcional: libere o botão se o app.js acusar erro
+      const _orig = window.showLoginError;
+      window.showLoginError = (text) => {
+        msg.textContent = text || 'Falha ao entrar.';
+        btn.disabled = false;
+        btn.querySelector('.normal').classList.remove('d-none');
+        btn.querySelector('.loading').classList.add('d-none');
+        if (typeof _orig === 'function') _orig(text);
+      };
+    }
+
+    // Se já existe bindLogin() no seu app.js, chamamos normalmente
+    if (typeof bindLogin === 'function') {
+      wrapBindLogin();
+      bindLogin();
+    }
+  </script>
+</body>
+</html>

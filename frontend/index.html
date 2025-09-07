@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YpeTec — Plataforma de Startups</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <style>
+    /* =========================
+       Paleta YpeTec (amarelo / preto / branco)
+       ========================= */
+    :root{
+      /* Marca */
+      --brand-yellow: #ffd400; /* amarelo vivo, excelente contraste em preto */
+      --brand-yellow-600: #f2c200;
+      --brand-yellow-700: #e3b400;
+      --brand-black: #0a0a0a;
+      --brand-white: #ffffff;
+
+      /* Texto / superfícies */
+      --ink-1: #0b0f19;     /* títulos (quase preto) */
+      --ink-2: #1f2937;     /* corpo */
+      --ink-3: #4b5563;     /* auxiliar */
+      --bg-1: #ffffff;      /* fundo claro */
+      --surface: #ffffff;   /* cartões */
+      --ring: rgba(10,10,10,.10);
+
+      /* Realces */
+      --accent-1: var(--brand-yellow);
+      --accent-2: #111827;  /* preto/cinza profundo p/ gradiente */
+    }
+
+    /* Base */
+    html, body { height: 100%; background: var(--bg-1); color: var(--ink-2); }
+    body{
+      background-image:
+        radial-gradient(900px 600px at 12% 10%, rgba(255,212,0,.10), transparent 60%),
+        radial-gradient(900px 600px at 90% -10%, rgba(0,0,0,.05), transparent 55%);
+      background-attachment: fixed;
+    }
+    h1, h2, h3, h4, h5, h6 { color: var(--ink-1); }
+    .text-ink-3 { color: var(--ink-3); }
+    .section-title { color: var(--ink-1); }
+
+    /* Navbar */
+    .navbar{
+      background: var(--brand-black) !important;
+      border-bottom: 3px solid var(--brand-yellow);
+    }
+    .navbar .navbar-brand,
+    .navbar .nav-link { color: #fff !important; }
+    .navbar .nav-link:hover { color: var(--brand-yellow) !important; }
+    .navbar .btn-login {
+      background: var(--brand-yellow);
+      color: #111 !important;
+      border: 0;
+      font-weight: 600;
+    }
+    .navbar .btn-login:hover { filter: brightness(0.95); }
+
+    /* Hero */
+    .hero{ position: relative; border-bottom: 1px solid var(--ring); }
+    .eyebrow { text-transform: uppercase; letter-spacing: .18em; font-weight:700; font-size:.78rem; color:#6b7280; }
+    .btn-brand {
+      background: linear-gradient(90deg, var(--brand-yellow), var(--brand-yellow-600));
+      border: none; color:#111; font-weight:700;
+    }
+    .btn-brand:hover { background: linear-gradient(90deg, var(--brand-yellow-600), var(--brand-yellow-700)); }
+    .btn-ghost {
+      border: 2px solid var(--brand-black);
+      color: var(--brand-black);
+      background: transparent;
+      font-weight: 700;
+    }
+    .btn-ghost:hover {
+      background: var(--brand-black);
+      color: #fff;
+    }
+
+    /* Cards / glass */
+    .glass{
+      background: var(--surface);
+      border: 1px solid var(--ring);
+      border-radius: 16px;
+    }
+    .card-elev{ transition: transform .25s ease, box-shadow .25s ease; }
+    .card-elev:hover{ transform: translateY(-3px); box-shadow: 0 16px 40px rgba(0,0,0,.10); }
+
+    /* Badges / detalhes */
+    .badge-soft{
+      background: #fff6cc; /* amarelo bem suave */
+      border: 1px solid rgba(250, 204, 21, .6);
+      color: #7a5c00;
+      font-weight: 600;
+    }
+
+    /* Skeletons */
+    .skeleton{
+      position: relative; overflow: hidden; border-radius: 12px;
+      background: linear-gradient(100deg, rgba(17,24,39,.08) 40%, rgba(17,24,39,.14) 50%, rgba(17,24,39,.08) 60%);
+      background-size: 200% 100%; animation: shimmer 1.4s infinite;
+    }
+    @keyframes shimmer { to { background-position-x: -200%; } }
+
+    /* Imagens aprovados */
+    .approved-img{ aspect-ratio: 16/9; object-fit: cover; border-bottom: 1px solid var(--ring); }
+
+    /* Footer */
+    footer{ border-top: 1px solid var(--ring); color: var(--ink-3); }
+  </style>
+</head>
+
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg sticky-top">
+  <div class="container py-2">
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <img src="img/logo.png" alt="YpeTec" height="60" class="d-inline-block">
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain" aria-controls="navMain" aria-expanded="false" aria-label="Alternar navegação">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+        <li class="nav-item"><a class="nav-link" href="#editais"><i class="bi bi-megaphone"></i> Editais</a></li>
+        <li class="nav-item"><a class="nav-link" href="#aprovados"><i class="bi bi-stars"></i> Aprovados</a></li>
+        <li class="nav-item"><a class="nav-link" href="#sobre"><i class="bi bi-info-circle"></i> Sobre</a></li>
+        <!-- Área dinâmica de autenticação -->
+        <li class="nav-item ms-lg-3" id="authArea">
+          <a href="login.html" class="btn btn-login btn-sm px-3">
+            <i class="bi bi-box-arrow-in-right"></i> Entrar
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+  <!-- HERO -->
+  <header class="hero py-5 py-lg-6">
+    <div class="container py-4">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <div class="eyebrow mb-2">Plataforma de Inovação</div>
+          <h1 class="display-5 fw-bold">Acelere sua ideia com a <span style="color:var(--brand-yellow)">YpeTec</span></h1>
+          <p class="lead mt-3 mb-4 text-ink-3">
+            Inscreva seu projeto nos editais, receba mentoria e faça parte do ecossistema de inovação.
+            Transparência no processo, acompanhamento contínuo e vitrine de resultados.
+          </p>
+          <div class="d-flex gap-3">
+            <a href="#editais" class="btn btn-brand btn-lg px-4"><i class="bi bi-megaphone"></i> Ver editais abertos</a>
+            <a href="#aprovados" class="btn btn-ghost btn-lg px-4"><i class="bi bi-stars"></i> Conheça os aprovados</a>
+          </div>
+          <div class="d-flex gap-4 mt-4 text-ink-3 small">
+            <div><i class="bi bi-shield-check me-1" style="color:var(--brand-yellow)"></i> Processos auditáveis</div>
+            <div><i class="bi bi-people me-1" style="color:var(--brand-yellow)"></i> Mentores qualificados</div>
+            <div><i class="bi bi-graph-up me-1" style="color:var(--brand-yellow)"></i> Acompanhamento de progresso</div>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="glass p-4 p-lg-5 card-elev">
+            <div class="d-flex align-items-center mb-3">
+              <span class="badge badge-soft me-2"><i class="bi bi-lightning-charge"></i> Em destaque</span>
+              <span class="small text-ink-3">Fluxo simplificado em 3 etapas</span>
+            </div>
+            <div class="vstack gap-3">
+              <div class="d-flex gap-3">
+                <div class="badge rounded-pill" style="background:var(--brand-black); color:#fff; font-weight:700">1</div>
+                <div>
+                  <h6 class="mb-1">Submeta seu projeto</h6>
+                  <p class="mb-0 text-ink-3">Crie o projeto e envie para o edital ativo.</p>
+                </div>
+              </div>
+              <div class="d-flex gap-3">
+                <div class="badge rounded-pill" style="background:var(--brand-black); color:#fff; font-weight:700">2</div>
+                <div>
+                  <h6 class="mb-1">Seja avaliado</h6>
+                  <p class="mb-0 text-ink-3">Acompanhe o status: aprovado, ajustes ou reprovado.</p>
+                </div>
+              </div>
+              <div class="d-flex gap-3">
+                <div class="badge rounded-pill" style="background:var(--brand-black); color:#fff; font-weight:700">3</div>
+                <div>
+                  <h6 class="mb-1">Incube e cresça</h6>
+                  <p class="mb-0 text-ink-3">Mentorias, relatórios e divulgação dos resultados.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>  
+    </div>
+  </header>
+
+  <!-- STATS -->
+  <section class="py-4">
+    <div class="container">
+      <div class="row g-3 text-center">
+        <div class="col-6 col-lg-3"><div class="glass p-3"><div class="h3 mb-0">+120</div><div class="text-ink-3 small">Projetos cadastrados</div></div></div>
+        <div class="col-6 col-lg-3"><div class="glass p-3"><div class="h3 mb-0">+40</div><div class="text-ink-3 small">Mentores ativos</div></div></div>
+        <div class="col-6 col-lg-3"><div class="glass p-3"><div class="h3 mb-0">8</div><div class="text-ink-3 small">Editais/ano</div></div></div>
+        <div class="col-6 col-lg-3"><div class="glass p-3"><div class="h3 mb-0">100%</div><div class="text-ink-3 small">Processo transparente</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EDITAIS ABERTOS -->
+  <section id="editais" class="py-5">
+    <div class="container">
+      <div class="d-flex align-items-end justify-content-between mb-3">
+        <div>
+          <h2 class="section-title mb-1">Editais abertos</h2>
+          <p class="text-ink-3 mb-0">Inscreva seu projeto nos editais vigentes.</p>
+        </div>
+        <a href="calls.html" class="btn btn-ghost"><i class="bi bi-megaphone"></i> Publicar edital</a>
+      </div>
+
+      <div id="callsList" class="row g-4">
+        <div class="col-md-6 col-lg-4"><div class="skeleton" style="height: 180px"></div></div>
+        <div class="col-md-6 col-lg-4"><div class="skeleton" style="height: 180px"></div></div>
+        <div class="col-md-6 col-lg-4"><div class="skeleton" style="height: 180px"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJETOS APROVADOS -->
+  <section id="aprovados" class="py-5">
+    <div class="container">
+      <div class="d-flex align-items-end justify-content-between mb-3">
+        <div>
+          <h2 class="section-title mb-1">Projetos aprovados</h2>
+          <p class="text-ink-3 mb-0">Conheça startups que já avançaram no processo.</p>
+        </div>
+        <span class="btn btn-ghost disabled" tabindex="-1" aria-disabled="true"><i class="bi bi-grid"></i> Ver portfólio</span>
+      </div>
+
+      <div id="approvedList" class="row g-4">
+        <!-- Placeholders -->
+        <div class="col-md-6 col-lg-4">
+          <div class="glass card-elev h-100">
+            <div class="approved-img skeleton"></div>
+            <div class="p-3">
+              <div class="skeleton" style="height: 20px; width: 60%"></div>
+              <div class="skeleton mt-2" style="height: 14px; width: 90%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="glass card-elev h-100">
+            <div class="approved-img skeleton"></div>
+            <div class="p-3">
+              <div class="skeleton" style="height: 20px; width: 60%"></div>
+              <div class="skeleton mt-2" style="height: 14px; width: 90%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="glass card-elev h-100">
+            <div class="approved-img skeleton"></div>
+            <div class="p-3">
+              <div class="skeleton" style="height: 20px; width: 60%"></div>
+              <div class="skeleton mt-2" style="height: 14px; width: 90%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOBRE -->
+  <section id="sobre" class="py-5">
+    <div class="container">
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-6">
+          <h2 class="section-title">Por que a YpeTec?</h2>
+          <p class="text-ink-3">Apoio de ponta a ponta: submissão, avaliação, mentoria e acompanhamento com relatórios de progresso. Tudo em uma plataforma única, com governança e transparência.</p>
+          <div class="row g-3 mt-1">
+            <div class="col-sm-6"><div class="glass p-3 h-100"><i class="bi bi-magic"></i> Processo simples</div></div>
+            <div class="col-sm-6"><div class="glass p-3 h-100"><i class="bi bi-shield-lock"></i> Segurança e papéis</div></div>
+            <div class="col-sm-6"><div class="glass p-3 h-100"><i class="bi bi-people"></i> Comunidade e mentoria</div></div>
+            <div class="col-sm-6"><div class="glass p-3 h-100"><i class="bi bi-bar-chart"></i> Métricas e resultados</div></div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="glass p-4 p-lg-5">
+            <h5 class="mb-3"><i class="bi bi-check2-circle"></i> O que você faz aqui</h5>
+            <ul class="mb-4 text-ink-3">
+              <li>Cria e submete projetos para editais ativos;</li>
+              <li>Acompanha a avaliação e a divulgação dos aprovados;</li>
+              <li>Solicita mentoria e envia relatórios de progresso;</li>
+              <li>Gerencia sua equipe e seu ciclo de incubação.</li>
+            </ul>
+            <a href="projects_submit.html" class="btn btn-brand"><i class="bi bi-plus-circle"></i> Enviar projeto</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-4">
+    <div class="container d-flex flex-column flex-lg-row gap-3 justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-lightning-charge-fill" style="color:var(--brand-yellow)"></i>
+        <span class="fw-semibold">YpeTec</span>
+        <span class="text-ink-3">© 2025</span>
+      </div>
+      <div class="small text-ink-3">Transparência • Segurança • Inovação</div>
+    </div>
+  </footer>
+
+  <!-- JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+  function initIndex() {
+    // agora carrega TODOS os editais
+    if (typeof loadAllCalls === 'function') {
+      loadAllCalls({ status: 'all' });
+    } else if (typeof loadOpenCalls === 'function') {
+      // fallback: se você preferir manter a função antiga, passe o status via query interna
+      loadOpenCalls({ status: 'all' });
+    }
+    if (typeof loadApprovedProjects === 'function') loadApprovedProjects();
+  }
+
+  // garante execução tanto no load normal quanto quando o navegador volta do histórico (bfcache)
+  window.addEventListener('DOMContentLoaded', initIndex);
+  window.addEventListener('pageshow', (e) => { if (e.persisted) initIndex(); });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,76 @@
+Tabela,Coluna,Tipo,PermiteNulo,Chave,ValorPadrao,Extra
+audit_log,id,"bigint unsigned",NO,PRI,NULL,auto_increment
+audit_log,user_id,"int unsigned",YES,MUL,NULL,
+audit_log,action,varchar(80),NO,,NULL,
+audit_log,entity,varchar(80),NO,MUL,NULL,
+audit_log,entity_id,"bigint unsigned",NO,,NULL,
+audit_log,created_at,timestamp,YES,,CURRENT_TIMESTAMP,DEFAULT_GENERATED
+calls,id,"int unsigned",NO,PRI,NULL,auto_increment
+calls,title,varchar(160),NO,,NULL,
+calls,description,text,NO,,NULL,
+calls,start_at,datetime,NO,MUL,NULL,
+calls,end_at,datetime,NO,,NULL,
+calls,status,"enum('RASCUNHO','PUBLICADO','ENCERRADO')",NO,MUL,RASCUNHO,
+calls,created_by,"int unsigned",NO,MUL,NULL,
+calls,created_at,timestamp,YES,,CURRENT_TIMESTAMP,DEFAULT_GENERATED
+calls,updated_at,timestamp,YES,,CURRENT_TIMESTAMP,"DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+evaluations,id,"int unsigned",NO,PRI,NULL,auto_increment
+evaluations,submission_id,"int unsigned",NO,MUL,NULL,
+evaluations,evaluator_user_id,"int unsigned",NO,MUL,NULL,
+evaluations,status,"enum('APROVADO','REPROVADO','NECESSITA_AJUSTES')",NO,MUL,NULL,
+evaluations,comments,text,NO,,NULL,
+evaluations,evaluated_at,datetime,NO,,CURRENT_TIMESTAMP,DEFAULT_GENERATED
+mentorship_requests,id,"int unsigned",NO,PRI,NULL,auto_increment
+mentorship_requests,project_id,"int unsigned",NO,MUL,NULL,
+mentorship_requests,area,varchar(80),NO,,NULL,
+mentorship_requests,justification,text,NO,,NULL,
+mentorship_requests,status,"enum('SOLICITADA','EM_ANDAMENTO','CONCLUIDA','NEGADA')",NO,,SOLICITADA,
+mentorship_requests,created_by,"int unsigned",NO,MUL,NULL,
+mentorship_requests,created_at,timestamp,YES,,CURRENT_TIMESTAMP,DEFAULT_GENERATED
+progress_reports,id,"int unsigned",NO,PRI,NULL,auto_increment
+progress_reports,project_id,"int unsigned",NO,MUL,NULL,
+progress_reports,period,"enum('MENSAL','TRIMESTRAL')",NO,,NULL,
+progress_reports,content,text,NO,,NULL,
+progress_reports,created_by,"int unsigned",NO,MUL,NULL,
+progress_reports,created_at,timestamp,YES,,CURRENT_TIMESTAMP,DEFAULT_GENERATED
+project_publications,id,"int unsigned",NO,PRI,NULL,auto_increment
+project_publications,project_id,"int unsigned",NO,MUL,NULL,
+project_publications,logo_path,varchar(255),NO,,NULL,
+project_publications,public_description,text,NO,,NULL,
+project_publications,published_by,"int unsigned",NO,MUL,NULL,
+project_publications,published_at,datetime,NO,,CURRENT_TIMESTAMP,DEFAULT_GENERATED
+project_team,id,"int unsigned",NO,PRI,NULL,auto_increment
+project_team,project_id,"int unsigned",NO,MUL,NULL,
+project_team,user_id,"int unsigned",NO,MUL,NULL,
+project_team,role_in_team,varchar(80),NO,,NULL,
+project_team,created_at,timestamp,YES,,CURRENT_TIMESTAMP,DEFAULT_GENERATED
+projects,id,"int unsigned",NO,PRI,NULL,auto_increment
+projects,owner_user_id,"int unsigned",NO,MUL,NULL,
+projects,title,varchar(160),NO,,NULL,
+projects,summary,text,NO,,NULL,
+projects,area,varchar(80),NO,,NULL,
+projects,status,"enum('PRE_SUBMISSAO','SUBMETIDO','APROVADO','REPROVADO','AJUSTES','INCUBADO','INATIVO','DESLIGADO')",NO,MUL,PRE_SUBMISSAO,
+projects,created_at,timestamp,YES,,CURRENT_TIMESTAMP,DEFAULT_GENERATED
+projects,updated_at,timestamp,YES,,CURRENT_TIMESTAMP,"DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+projects,deleted_at,datetime,YES,,NULL,
+publications,id,"int unsigned",NO,PRI,NULL,auto_increment
+publications,project_id,"int unsigned",NO,MUL,NULL,
+publications,logo_url,varchar(255),NO,,NULL,
+publications,public_description,text,NO,,NULL,
+publications,published_at,datetime,NO,,CURRENT_TIMESTAMP,DEFAULT_GENERATED
+publications,created_by,"int unsigned",NO,MUL,NULL,
+submissions,id,"int unsigned",NO,PRI,NULL,auto_increment
+submissions,project_id,"int unsigned",NO,MUL,NULL,
+submissions,call_id,"int unsigned",NO,MUL,NULL,
+submissions,status,"enum('ENVIADA','EM_AVALIACAO','APROVADA','REPROVADA','AJUSTES_SOLICITADOS')",NO,MUL,ENVIADA,
+submissions,submitted_at,datetime,NO,,CURRENT_TIMESTAMP,DEFAULT_GENERATED
+users,id,"int unsigned",NO,PRI,NULL,auto_increment
+users,name,varchar(120),NO,,NULL,
+users,cpf,char(11),NO,UNI,NULL,
+users,email,varchar(160),NO,UNI,NULL,
+users,password_hash,varchar(100),NO,,NULL,
+users,role,"enum('ADMIN','ALUNO','MENTOR','INVESTIDOR')",NO,MUL,ALUNO,
+users,status,"enum('ATIVO','INATIVO')",NO,,ATIVO,
+users,created_at,timestamp,YES,,CURRENT_TIMESTAMP,DEFAULT_GENERATED
+users,updated_at,timestamp,YES,,CURRENT_TIMESTAMP,"DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+users,deleted_at,datetime,YES,,NULL,

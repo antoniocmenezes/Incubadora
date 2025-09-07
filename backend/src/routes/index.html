@@ -1,0 +1,28 @@
+import { Router } from 'express';
+import { login } from '../controllers/authController.js';
+import { publishCall, getOpenCalls } from '../controllers/callsController.js';
+import { createProjectCtrl } from '../controllers/projectsController.js';
+import { submitProjectCtrl } from '../controllers/submissionsController.js';
+import { evaluateSubmissionCtrl } from '../controllers/evaluationsController.js';
+import { authRequired, requireRole } from '../middlewares/auth.js';
+
+const router = Router();
+
+// RF001 - Login
+router.post('/auth/login', login);
+
+// RF006 - Publicar edital (ADMIN)
+router.post('/calls', authRequired, requireRole('ADMIN'), publishCall);
+// listar editais abertos
+router.get('/calls/open', getOpenCalls);
+
+// RF004 - Criar projeto (ALUNO)
+router.post('/projects', authRequired, requireRole('ALUNO'), createProjectCtrl);
+
+// RF004 - Submeter projeto a edital
+router.post('/submissions', authRequired, requireRole('ALUNO'), submitProjectCtrl);
+
+// RF005 - Avaliar projeto (ADMIN)
+router.post('/evaluations', authRequired, requireRole('ADMIN'), evaluateSubmissionCtrl);
+
+export default router;
