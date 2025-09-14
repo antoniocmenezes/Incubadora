@@ -36,6 +36,30 @@ function currentUser() {
   return { id: p.id, role: p.role, name: p.name };
 }
 
+
+// injeta / remove o botão "Avaliar" na navbar conforme o papel
+function injectAdminNav() {
+  const slot = document.getElementById('evalNav');
+  if (!slot) return;
+  const u = currentUser();
+
+  if (u?.role === 'ADMIN') {
+    slot.classList.remove('d-none');
+    slot.innerHTML = `
+      <a class="nav-link" href="evaluations.html" title="Avaliar projetos">
+        <i class="bi bi-clipboard-check"></i> Avaliar Projeto
+      </a>
+    `;
+  } else {
+    slot.classList.add('d-none');
+    slot.innerHTML = '';
+  }
+}
+
+// (se quiser revalidar ao trocar de página)
+document.addEventListener('DOMContentLoaded', injectAdminNav);
+
+
 // Renderiza área de autenticação na navbar (#authArea)
 function renderAuthArea() {
   const el = document.getElementById('authArea');
@@ -67,7 +91,12 @@ function renderAuthArea() {
   } else {
     el.innerHTML = `<a href="login.html" class="btn btn-login btn-sm px-3"><i class="bi bi-box-arrow-in-right"></i> Entrar</a>`;
   }
+
+  // <- garante o botão de avaliações na navbar conforme o papel
+  injectAdminNav();
 }
+
+
 
 // ================== OPEN CALLS ==================
 async function loadOpenCalls() {
@@ -157,52 +186,93 @@ function bindPublishCall() {
 function bindCreateProjectAndSubmit() {
   const projForm = document.getElementById('projectForm');
   const projMsg = document.getElementById('projMsg');
-  const subForm = document.getElementById('submitForm');
-  const subMsg = document.getElementById('subMsg');
 
-  if (projForm) {
-    projForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      projMsg.textContent = '';
-      const fd = new FormData(projForm);
-      const payload = {
-        title: fd.get('title'),
-        summary: fd.get('summary'),
-        area: fd.get('area')
-      };
+  // Lê o callId da URL (?callId=123)
+  const params = new URLSearchParams(location.search);
+  const callId = params.get('callId') ? Number(params.get('callId')) : null;
+
+  if (!projForm) return;
+
+  projForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    projMsg.textContent = '';
+    projMsg.classList.remove('text-danger', 'text-success');
+
+    // Precisa estar logado (token no localStorage)
+    if (!token()) {
+      projMsg.textContent = 'Você precisa estar logado para criar/submeter.';
+      projMsg.classList.add('text-danger');
+      return;
+    }
+
+    const fd = new FormData(projForm);
+    const payload = {
+      title: fd.get('title')?.trim(),
+      summary: fd.get('summary')?.trim(),
+      area: fd.get('area')?.trim()
+    };
+
+    try {
+      // 1) Cria o projeto
       const res = await fetch(`${API}/projects`, {
         method: 'POST',
         headers: { 'Content-Type':'application/json', ...authHeader() },
         body: JSON.stringify(payload)
       });
       const data = await res.json();
-      if (!res.ok) { projMsg.textContent = data.error || 'Erro'; projMsg.classList.replace('text-success','text-danger'); return; }
-      projMsg.textContent = `Projeto criado! ID ${data.id}`;
-      projMsg.classList.replace('text-danger','text-success');
-    });
-  }
 
-  if (subForm) {
-    subForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      subMsg.textContent = '';
-      const fd = new FormData(subForm);
-      const payload = {
-        project_id: Number(fd.get('project_id')),
-        call_id: Number(fd.get('call_id'))
-      };
-      const res = await fetch(`${API}/submissions`, {
-        method: 'POST',
-        headers: { 'Content-Type':'application/json', ...authHeader() },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (!res.ok) { subMsg.textContent = data.error || 'Erro'; subMsg.classList.replace('text-success','text-danger'); return; }
-      subMsg.textContent = `Submissão criada! ID ${data.id}`;
-      subMsg.classList.replace('text-danger','text-success');
-    });
-  }
+      if (!res.ok) {
+        projMsg.textContent = data?.error || 'Erro ao criar projeto';
+        projMsg.classList.add('text-danger');
+        return;
+      }
+
+      const projectId = data.id || data.project_id || data.projectId;
+      if (!projectId) {
+        projMsg.textContent = 'Projeto criado, mas não retornou ID.';
+        projMsg.classList.add('text-danger');
+        return;
+      }
+
+      // 2) Se a página foi aberta com ?callId=..., submete automaticamente ao edital
+      if (callId) {
+        const subRes = await fetch(`${API}/submissions`, {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json', ...authHeader() },
+          body: JSON.stringify({ project_id: Number(projectId), call_id: Number(callId) })
+        });
+        const subData = await subRes.json();
+
+        if (!subRes.ok) {
+          // Trata erros comuns de auth/role
+          if (subRes.status === 401) {
+            projMsg.textContent = 'Não autorizado. Faça login novamente.';
+          } else if (subRes.status === 403) {
+            projMsg.textContent = 'Ação não permitida. Perfil necessário: ALUNO.';
+          } else {
+            projMsg.textContent = subData?.error || 'Erro ao submeter ao edital';
+          }
+          projMsg.classList.add('text-danger');
+          return;
+        }
+
+        projMsg.textContent = `Projeto criado (ID ${projectId}) e submetido ao edital #${callId}!`;
+        projMsg.classList.add('text-success');
+        // opcional: redirecionar
+        // location.href = `edital.html?id=${callId}`;
+      } else {
+        // Sem callId na URL: apenas informa o ID criado
+        projMsg.textContent = `Projeto criado! ID ${projectId}`;
+        projMsg.classList.add('text-success');
+      }
+    } catch (err) {
+      console.error('submit project error', err);
+      projMsg.textContent = 'Falha inesperada ao criar/submeter.';
+      projMsg.classList.add('text-danger');
+    }
+  });
 }
+
 
 // ================== EVALUATIONS (ADMIN) ==================
 function bindEvaluate() {

@@ -1,9 +1,7 @@
-Listagem de caminhos de pasta para o volume OS
-O n£mero de s‚rie do volume ‚ 7A4D-4444
 C:.
 ³   estrutura.txt
 ³   
-ÃÄÄÄbackend
+backend
 ³   ³   .env
 ³   ³   .env.example
 ³   ³   generate-hash.js
@@ -12,11 +10,11 @@ C:.
 ³   ³   server.js
 ³   ³   
 
-³   ÃÄÄÄsrc
-³   ³   ÃÄÄÄconfig
+³   src
+³   ³   config
 ³   ³   ³       db.js
 ³   ³   ³       
-³   ³   ÃÄÄÄcontrollers
+³   ³   controllers
 ³   ³   ³       authController.js
 ³   ³   ³       callsController.js
 ³   ³   ³       evaluationsController.js
@@ -24,11 +22,11 @@ C:.
 ³   ³   ³       publicationsController.js
 ³   ³   ³       submissionsController.js
 ³   ³   ³       
-³   ³   ÃÄÄÄmiddlewares
+³   ³   middlewares
 ³   ³   ³       auth.js
 ³   ³   ³       upload.js
 ³   ³   ³       
-³   ³   ÃÄÄÄrepositories
+³   ³   repositories
 ³   ³   ³       callsRepo.js
 ³   ³   ³       evaluationsRepo.js
 ³   ³   ³       projectsRepo.js
@@ -36,14 +34,15 @@ C:.
 ³   ³   ³       submissionsRepo.js
 ³   ³   ³       usersRepo.js
 ³   ³   ³       
-³   ³   ÀÄÄÄroutes
+³   ³   routes
 ³   ³           index.html
 ³   ³           index.js
 ³   ³           
-³   ÀÄÄÄuploads
-ÃÄÄÄdatabase
-ÀÄÄÄfrontend
+³   uploads
+database
+frontend
     ³   calls.html
+    ³   edital.html
     ³   evaluations.html
     ³   index.html
     ³   login.html
