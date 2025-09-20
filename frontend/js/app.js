@@ -536,6 +536,23 @@ function bindPublishApproved() {
   });
 }
 
+// ============ AUTH: REGISTER ============
+async function registerUser({ name, cpf, email, password }) {
+  const res = await fetch(`${API}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, cpf, email, password })
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: 'Erro no cadastro' }));
+    throw new Error(err.message || 'Erro no cadastro');
+  }
+
+  return res.json();
+}
+
+
 
 // ================== BOOT ==================
 document.addEventListener('DOMContentLoaded', renderAuthArea);
@@ -555,4 +572,4 @@ window.bindEvaluate = bindEvaluate;
 window.loadAllCalls = loadAllCalls;
 window.bindPublishApproved = bindPublishApproved;
 window.goPublishApproved = goPublishApproved;
-
+window.registerUser = registerUser;

@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { pool } from '../config/db.js';
 
 // controllers
-import { login } from '../controllers/authController.js';
+import { login, register } from '../controllers/authController.js';
 import { publishCall, getCalls, getCallById } from '../controllers/callsController.js';
 import { createProjectCtrl } from '../controllers/projectsController.js';
 import { listSubmissionsCtrl, submitProjectCtrl } from '../controllers/submissionsController.js'; // <- UM ÚNICO import
@@ -33,6 +33,7 @@ router.get('/db-ping', async (_req, res) => {
 // RF001 - Autenticação
 // ========================
 router.post('/auth/login', login);
+router.post('/auth/register', register); // << nova rota pública
 
 // =====================================
 // RF004 - Projeto & Submissão (ALUNO)
