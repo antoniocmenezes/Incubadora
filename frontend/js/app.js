@@ -104,18 +104,89 @@ async function loadOpenCalls() {
   if (!el) return;
   const res = await fetch(`${API}/calls?status=open`);
   const data = await res.json();
-  el.innerHTML = data.map(c => `
-    <div class="col-md-4">
-      <div class="card h-100 shadow-sm">
-        <div class="card-body">
-          <h5 class="card-title">${c.title}</h5>
-          <p class="card-text">${c.description.substring(0,140)}...</p>
-          <span class="badge text-bg-success">Aberto</span>
+  el.innerHTML = data.map(c => {
+    const d = (c.description || '');
+    const preview = d.length > 140 ? d.substring(0,140) + '...' : d;
+    return `
+      <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">${c.title}</h5>
+            <p class="card-text">${preview}</p>
+            <span class="badge text-bg-success">Aberto</span>
+          </div>
         </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
+
+// Base do servidor (remove o /api do final)
+const API_BASE = API.replace(/\/api\/?$/, '');
+
+// Transforma filename ou caminho relativo em URL absoluta
+function fileUrl(u) {
+  if (!u) return null;
+  u = String(u).trim().replace(/\\/g, '/'); // normaliza "\" -> "/"
+  if (/^https?:\/\//i.test(u)) return u;                 // já é absoluta
+  if (u.startsWith('./')) u = u.slice(2);                // remove "./"
+  if (u.startsWith('/')) return API_BASE + u;            // "/uploads/x.png"
+  if (u.startsWith('uploads/') || u.startsWith('public/uploads/'))
+    return `${API_BASE}/${u}`;                           // "uploads/x.png"
+  // se veio só o nome do arquivo, presume pasta /uploads
+  return `${API_BASE}/uploads/${u}`;
+}
+
+// ============ APROVADOS (HOME) ============
+async function loadApprovedProjects() {
+  const box = document.getElementById('approvedList');
+  if (!box) return;
+
+  try {
+    // limpa os placeholders
+    box.innerHTML = '';
+
+    // Se a rota for pública, o header vazio não atrapalha
+    const res = await fetch(`${API}/publications`, { headers: { ...authHeader() } });
+    if (!res.ok) throw new Error('Falha ao carregar publicações');
+
+    const list = await res.json();
+
+    if (!Array.isArray(list) || list.length === 0) {
+      box.innerHTML = `<div class="col-12"><p class="text-ink-3">Nenhum projeto aprovado divulgado ainda.</p></div>`;
+      return;
+    }
+
+    for (const p of list) {
+      // tente vários nomes de campo vindos da API
+      const rawLogo = p.logo_url ?? p.logo_path ?? p.logo ?? p.logoPath ?? p.logo_file ?? p.logoFilename ?? '';
+      const logo = fileUrl(rawLogo) || 'img/logo.png'; // fallback só se realmente não houver
+      const title = p.title || 'Projeto aprovado';
+      const desc  = p.description || p.public_description || '';
+
+      const col = document.createElement('div');
+      col.className = 'col-md-6 col-lg-4';
+      col.innerHTML = `
+  <div class="glass card-elev h-100 rounded-4 overflow-hidden">
+    <div class="ratio ratio-16x9">
+      <img src="${logo}" alt="Logo de ${title}" class="w-100 h-100" style="object-fit:cover;">
+    </div>
+    <div class="p-3">
+      <h5 class="mb-1">${title}</h5>
+      <p class="text-ink-3 small mb-0">${desc}</p>
+    </div>
+  </div>
+`;
+
+      box.appendChild(col);
+    }
+  } catch (err) {
+    console.error(err);
+    box.innerHTML = `<div class="col-12"><p class="text-danger">Erro ao carregar projetos aprovados.</p></div>`;
+  }
+}
+
+
 
 // ================== LOGIN ==================
 function bindLogin() {
@@ -379,6 +450,80 @@ async function initEditalDetail() {
   }
 }
 
+// ===== ROLES & NAVIGATION para publicação de aprovados =====
+function currentRole(){
+  const u = currentUser?.();
+  return u?.role || null; // "ADMIN" ou "ALUNO"
+}
+
+function goPublishApproved(projectId, submissionId){
+  const qs = new URLSearchParams({
+    projectId: projectId ?? '',
+    submissionId: submissionId ?? ''
+  });
+  location.href = 'publish_approved.html?' + qs.toString();
+}
+
+// ===== PUBLISH APPROVED (ADMIN) =====
+// Handler chamado em publish_approved.html
+function bindPublishApproved() {
+  const form = document.getElementById('pubForm');
+  const msg  = document.getElementById('pubMsg');
+  if (!form) return;
+
+  // lê parâmetros ?projectId=&submissionId= da URL para pré-preencher
+  const url = new URL(location.href);
+  const qsProjectId   = url.searchParams.get('projectId');
+  const qsSubmissionId= url.searchParams.get('submissionId');
+
+  const projInput  = form.querySelector('[name="project_id"]');
+  if (qsProjectId && projInput) projInput.value = qsProjectId;
+
+  // opcional: manter submissionId em campo oculto se quiser enviar para auditoria
+  if (qsSubmissionId && !form.querySelector('[name="submission_id"]')) {
+    const hid = document.createElement('input');
+    hid.type = 'hidden';
+    hid.name = 'submission_id';
+    hid.value = qsSubmissionId;
+    form.appendChild(hid);
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (msg) { msg.textContent = ''; msg.className = 'ms-2 small'; }
+
+    // exige login ADMIN
+    if (currentRole() !== 'ADMIN') {
+      if (msg) { msg.textContent = 'Apenas ADMIN pode publicar.'; msg.classList.add('text-danger'); }
+      return;
+    }
+
+    try {
+      const fd = new FormData(form); // envia multipart (logo incluso)
+      const res = await fetch(`${API}/publications`, {
+        method: 'POST',
+        headers: { ...authHeader() }, // rota protegida
+        body: fd
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        if (msg) { msg.textContent = data?.error || 'Erro ao publicar'; msg.classList.add('text-danger'); }
+        return;
+      }
+
+      if (msg) { msg.textContent = `Publicado! ID ${data?.id ?? ''}`; msg.classList.add('text-success'); }
+      // volta pra home, na seção dos aprovados
+      location.href = 'index.html#aprovados';
+    } catch (err) {
+      console.error(err);
+      if (msg) { msg.textContent = 'Falha inesperada ao publicar.'; msg.classList.add('text-danger'); }
+    }
+  });
+}
+
+
 // ================== BOOT ==================
 document.addEventListener('DOMContentLoaded', renderAuthArea);
 
@@ -395,4 +540,6 @@ window.bindPublishCall = bindPublishCall;
 window.bindCreateProjectAndSubmit = bindCreateProjectAndSubmit;
 window.bindEvaluate = bindEvaluate;
 window.loadAllCalls = loadAllCalls;
+window.bindPublishApproved = bindPublishApproved;
+window.goPublishApproved   = goPublishApproved;
 

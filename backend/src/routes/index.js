@@ -6,7 +6,7 @@ import { pool } from '../config/db.js';
 import { login } from '../controllers/authController.js';
 import { publishCall, getCalls, getCallById } from '../controllers/callsController.js';
 import { createProjectCtrl } from '../controllers/projectsController.js';
-import { submitProjectCtrl } from '../controllers/submissionsController.js';
+import { listSubmissionsCtrl, submitProjectCtrl } from '../controllers/submissionsController.js'; // <- UM ÚNICO import
 import { evaluateSubmissionCtrl } from '../controllers/evaluationsController.js';
 import { publishApprovedProjectCtrl, listPublicationsCtrl } from '../controllers/publicationsController.js';
 
@@ -14,13 +14,12 @@ import { publishApprovedProjectCtrl, listPublicationsCtrl } from '../controllers
 import { authRequired, requireRole } from '../middlewares/auth.js';
 import { uploadLogo } from '../middlewares/upload.js';
 
-// *** declare o router ANTES de usar ***
 const router = Router();
 
 // sanity
 router.get('/', (_req, res) => res.json({ message: 'API da Incubadora - OK' }));
 
-// ping ao DB
+// ping DB
 router.get('/db-ping', async (_req, res) => {
   try {
     const [rows] = await pool.query('SELECT 1 AS pong');
@@ -35,22 +34,6 @@ router.get('/db-ping', async (_req, res) => {
 // ========================
 router.post('/auth/login', login);
 
-// ========================
-// RF006 - Editais (ADMIN)
-// ========================
-// cria edital
-router.post('/calls', authRequired, requireRole('ADMIN'), publishCall);
-
-// lista editais por status via query (?status=open|upcoming|closed|all)
-router.get('/calls', getCalls);
-router.get('/calls/:id', getCallById);
-
-// atalho para apenas abertos (reusa getCalls)
-router.get('/calls/open', (req, res) => {
-  req.query.status = 'open';
-  return getCalls(req, res);
-});
-
 // =====================================
 // RF004 - Projeto & Submissão (ALUNO)
 // =====================================
@@ -60,20 +43,21 @@ router.post('/submissions', authRequired, requireRole('ALUNO'), submitProjectCtr
 // =============================
 // RF005 - Avaliação (ADMIN)
 // =============================
+router.get('/submissions', authRequired, requireRole('ADMIN'), listSubmissionsCtrl); // GET para listar
 router.post('/evaluations', authRequired, requireRole('ADMIN'), evaluateSubmissionCtrl);
+
+// ========================
+// RF006 - Editais (ADMIN)
+// ========================
+router.post('/calls', authRequired, requireRole('ADMIN'), publishCall);
+router.get('/calls', getCalls);
+router.get('/calls/:id', getCallById);
+router.get('/calls/open', (req, res) => { req.query.status = 'open'; return getCalls(req, res); });
 
 // =========================================
 // RF007 - Publicações (ADMIN) + público
 // =========================================
-router.post(
-  '/publications',
-  authRequired,
-  requireRole('ADMIN'),
-  uploadLogo,
-  publishApprovedProjectCtrl
-);
-
-// público: lista publicações aprovadas
+router.post('/publications', authRequired, requireRole('ADMIN'), uploadLogo, publishApprovedProjectCtrl);
 router.get('/publications', listPublicationsCtrl);
 
 export default router;

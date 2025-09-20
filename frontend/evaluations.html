@@ -126,9 +126,9 @@
   <script src="./js/app.js"></script>
   <script>
     // ===== Helpers locais =====
-    const API = 'http://localhost:3001/api';
-    function token(){ return localStorage.getItem('token'); }
-    function authHeader(){ const t = token(); return t ? { 'Authorization':'Bearer '+t } : {}; }
+    //const API = 'http://localhost:3001/api';
+    //function token(){ return localStorage.getItem('token'); }
+    //function authHeader(){ const t = token(); return t ? { 'Authorization':'Bearer '+t } : {}; }
 
     function showAlert(type, text){
       const box = document.getElementById('alertBox');
@@ -146,23 +146,31 @@
     }
 
     // ===== Render de cards =====
-    function renderSubmissions(list = []){
-      const grid = document.getElementById('subsGrid');
-      if (!Array.isArray(list) || list.length === 0){
-        grid.innerHTML = `
-          <div class="col-12">
-            <div class="glass p-4 text-center text-ink-3">Nenhuma submissão encontrada.</div>
-          </div>`;
-        return;
-      }
+      function renderSubmissions(list = []){
+    const grid = document.getElementById('subsGrid');
+    if (!Array.isArray(list) || list.length === 0){
+      grid.innerHTML = `
+        <div class="col-12">
+          <div class="glass p-4 text-center text-ink-3">Nenhuma submissão encontrada.</div>
+        </div>`;
+      return;
+    }
+
+    const isAdmin = (typeof currentRole === 'function' && currentRole() === 'ADMIN');
 
       grid.innerHTML = list.map(item => {
         // Estrutura esperada do item (ajuste conforme seu backend):
         // { id, call_id, project_id, status (da submissão ou última avaliação), project: { title, summary, area } }
-        const title = item?.project?.title ?? `Projeto #${item.project_id}`;
-        const summary = item?.project?.summary ?? '';
-        const area = item?.project?.area ?? '';
+        const title = item.project_title ?? `Projeto #${item.project_id}`;
+        const summary = item.project_summary ?? '';
+        const area = item.project_area ?? '';
         const lastStatus = item?.evaluation_status || item?.status || null;
+        const isApproved = String(lastStatus || '').toUpperCase() === 'APROVADO';
+      const publishBtn = (isApproved && isAdmin)
+        ? `<button class="btn btn-ghost btn-sm mt-2" onclick="goPublishApproved(${item.project_id}, ${item.id})">
+             <i class="bi bi-megaphone"></i> Publicar projeto
+           </button>`
+        : '';
 
         return `
           <div class="col-12 col-md-6 col-lg-4">
@@ -195,6 +203,7 @@
                 </div>
                 <div class="d-flex align-items-center gap-2">
                   <button class="btn btn-brand btn-sm px-3" type="submit"><i class="bi bi-save"></i> Salvar</button>
+                   ${publishBtn}
                   <span class="small" data-role="msg"></span>
                 </div>
               </form>
