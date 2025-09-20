@@ -106,7 +106,7 @@ async function loadOpenCalls() {
   const data = await res.json();
   el.innerHTML = data.map(c => {
     const d = (c.description || '');
-    const preview = d.length > 140 ? d.substring(0,140) + '...' : d;
+    const preview = d.length > 140 ? d.substring(0, 140) + '...' : d;
     return `
       <div class="col-md-4">
         <div class="card h-100 shadow-sm">
@@ -162,21 +162,21 @@ async function loadApprovedProjects() {
       const rawLogo = p.logo_url ?? p.logo_path ?? p.logo ?? p.logoPath ?? p.logo_file ?? p.logoFilename ?? '';
       const logo = fileUrl(rawLogo) || 'img/logo.png'; // fallback só se realmente não houver
       const title = p.title || 'Projeto aprovado';
-      const desc  = p.description || p.public_description || '';
+      const desc = p.description || p.public_description || '';
 
       const col = document.createElement('div');
       col.className = 'col-md-6 col-lg-4';
       col.innerHTML = `
-  <div class="glass card-elev h-100 rounded-4 overflow-hidden">
-    <div class="ratio ratio-16x9">
-      <img src="${logo}" alt="Logo de ${title}" class="w-100 h-100" style="object-fit:cover;">
-    </div>
-    <div class="p-3">
-      <h5 class="mb-1">${title}</h5>
-      <p class="text-ink-3 small mb-0">${desc}</p>
-    </div>
-  </div>
-`;
+        <div class="glass card-elev h-100 rounded-4 overflow-hidden">
+          <div class="ratio ratio-16x9">
+            <img src="${logo}" alt="Logo de ${title}" class="w-100 h-100" style="object-fit:cover;">
+          </div>
+          <div class="p-3">
+            <h5 class="mb-1">${title}</h5>
+            <p class="text-ink-3 small mb-0">${desc}</p>
+          </div>
+        </div>
+      `;
 
       box.appendChild(col);
     }
@@ -203,7 +203,7 @@ function bindLogin() {
 
     const res = await fetch(`${API}/auth/login`, {
       method: 'POST',
-      headers: { 'Content-Type':'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
 
@@ -242,13 +242,13 @@ function bindPublishCall() {
     };
     const res = await fetch(`${API}/calls`, {
       method: 'POST',
-      headers: { 'Content-Type':'application/json', ...authHeader() },
+      headers: { 'Content-Type': 'application/json', ...authHeader() },
       body: JSON.stringify(payload)
     });
     const data = await res.json();
-    if (!res.ok) { msg.textContent = data.error || 'Erro'; msg.classList.replace('text-success','text-danger'); return; }
+    if (!res.ok) { msg.textContent = data.error || 'Erro'; msg.classList.replace('text-success', 'text-danger'); return; }
     msg.textContent = `Publicado! ID ${data.id}`;
-    msg.classList.replace('text-danger','text-success');
+    msg.classList.replace('text-danger', 'text-success');
     form.reset();
   });
 }
@@ -283,11 +283,20 @@ function bindCreateProjectAndSubmit() {
       area: fd.get('area')?.trim()
     };
 
+    // 👇 Adicione isto exatamente aqui (sem duplicar fd/payload)
+    if (typeof window.collectTeamFromUI === 'function') {
+      const team = window.collectTeamFromUI();
+      if (Array.isArray(team) && team.length > 0) {
+        payload.team = team;
+      }
+    }
+
+
     try {
       // 1) Cria o projeto
       const res = await fetch(`${API}/projects`, {
         method: 'POST',
-        headers: { 'Content-Type':'application/json', ...authHeader() },
+        headers: { 'Content-Type': 'application/json', ...authHeader() },
         body: JSON.stringify(payload)
       });
       const data = await res.json();
@@ -309,7 +318,7 @@ function bindCreateProjectAndSubmit() {
       if (callId) {
         const subRes = await fetch(`${API}/submissions`, {
           method: 'POST',
-          headers: { 'Content-Type':'application/json', ...authHeader() },
+          headers: { 'Content-Type': 'application/json', ...authHeader() },
           body: JSON.stringify({ project_id: Number(projectId), call_id: Number(callId) })
         });
         const subData = await subRes.json();
@@ -341,6 +350,10 @@ function bindCreateProjectAndSubmit() {
       projMsg.textContent = 'Falha inesperada ao criar/submeter.';
       projMsg.classList.add('text-danger');
     }
+    // Dentro do sucesso da submissão:
+projForm.classList.add('d-none');        // esconde o formulário
+document.getElementById('successMessage').classList.remove('d-none'); // mostra mensagem
+
   });
 }
 
@@ -361,13 +374,13 @@ function bindEvaluate() {
     };
     const res = await fetch(`${API}/evaluations`, {
       method: 'POST',
-      headers: { 'Content-Type':'application/json', ...authHeader() },
+      headers: { 'Content-Type': 'application/json', ...authHeader() },
       body: JSON.stringify(payload)
     });
     const data = await res.json();
-    if (!res.ok) { msg.textContent = data.error || 'Erro'; msg.classList.replace('text-success','text-danger'); return; }
+    if (!res.ok) { msg.textContent = data.error || 'Erro'; msg.classList.replace('text-success', 'text-danger'); return; }
     msg.textContent = `Avaliação salva! ID ${data.id}`;
-    msg.classList.replace('text-danger','text-success');
+    msg.classList.replace('text-danger', 'text-success');
     form.reset();
   });
 }
@@ -399,9 +412,9 @@ function renderCalls(calls = []) {
         <div class="glass card-elev h-100">
           <div class="p-3">
             <h5 class="mb-1">${c.title ?? 'Sem título'}</h5>
-            ${c.status   ? `<span class="badge badge-soft">${c.status}</span>` : ''}
+            ${c.status ? `<span class="badge badge-soft">${c.status}</span>` : ''}
             ${c.start_at ? `<div class="small text-ink-3 mt-2"><i class="bi bi-calendar-event"></i> Início: ${new Date(c.start_at).toLocaleDateString()}</div>` : ''}
-            ${c.end_at   ? `<div class="small text-ink-3"><i class="bi bi-hourglass-split"></i> Fim: ${new Date(c.end_at).toLocaleDateString()}</div>` : ''}
+            ${c.end_at ? `<div class="small text-ink-3"><i class="bi bi-hourglass-split"></i> Fim: ${new Date(c.end_at).toLocaleDateString()}</div>` : ''}
           </div>
         </div>
       </a>
@@ -451,12 +464,12 @@ async function initEditalDetail() {
 }
 
 // ===== ROLES & NAVIGATION para publicação de aprovados =====
-function currentRole(){
+function currentRole() {
   const u = currentUser?.();
   return u?.role || null; // "ADMIN" ou "ALUNO"
 }
 
-function goPublishApproved(projectId, submissionId){
+function goPublishApproved(projectId, submissionId) {
   const qs = new URLSearchParams({
     projectId: projectId ?? '',
     submissionId: submissionId ?? ''
@@ -468,15 +481,15 @@ function goPublishApproved(projectId, submissionId){
 // Handler chamado em publish_approved.html
 function bindPublishApproved() {
   const form = document.getElementById('pubForm');
-  const msg  = document.getElementById('pubMsg');
+  const msg = document.getElementById('pubMsg');
   if (!form) return;
 
   // lê parâmetros ?projectId=&submissionId= da URL para pré-preencher
   const url = new URL(location.href);
-  const qsProjectId   = url.searchParams.get('projectId');
-  const qsSubmissionId= url.searchParams.get('submissionId');
+  const qsProjectId = url.searchParams.get('projectId');
+  const qsSubmissionId = url.searchParams.get('submissionId');
 
-  const projInput  = form.querySelector('[name="project_id"]');
+  const projInput = form.querySelector('[name="project_id"]');
   if (qsProjectId && projInput) projInput.value = qsProjectId;
 
   // opcional: manter submissionId em campo oculto se quiser enviar para auditoria
@@ -541,5 +554,5 @@ window.bindCreateProjectAndSubmit = bindCreateProjectAndSubmit;
 window.bindEvaluate = bindEvaluate;
 window.loadAllCalls = loadAllCalls;
 window.bindPublishApproved = bindPublishApproved;
-window.goPublishApproved   = goPublishApproved;
+window.goPublishApproved = goPublishApproved;
 
