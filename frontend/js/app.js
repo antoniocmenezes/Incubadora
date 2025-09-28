@@ -189,41 +189,53 @@ async function loadApprovedProjects() {
 
 
 // ================== LOGIN ==================
+// ============ AUTH: LOGIN ============
 function bindLogin() {
   const form = document.getElementById('loginForm');
-  const msg = document.getElementById('loginMsg');
+  const msg  = document.getElementById('loginMsg');
   if (!form) return;
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    msg.textContent = '';
 
-    const formData = new FormData(form);
-    const payload = { cpf: formData.get('cpf'), password: formData.get('password') };
+    // pega valores (CPF sem máscara)
+    const fd = new FormData(form);
+    const cpf = (fd.get('cpf') || '').replace(/\D/g, '');
+    const password = (fd.get('password') || '').toString();
 
-    const res = await fetch(`${API}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    try {
+      const res = await fetch(`${API}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cpf, password })
+      });
 
-    const data = await res.json();
-    if (!res.ok) { msg.textContent = data.error || 'Erro ao entrar'; return; }
+      if (!res.ok) {
+        // tenta extrair mensagem do backend
+        const err = await res.json().catch(() => ({ message: 'Credenciais inválidas.' }));
+        throw new Error(err.message || 'Credenciais inválidas.');
+      }
 
-    // salva token
-    setToken(data.token);
+      const data = await res.json();
+      setToken(data.token); // sua helper global
+      // sucesso → vai pra home
+      location.href = 'index.html';
 
-    // salva nome (prioriza o que vier no body; senão extrai do JWT)
-    if (data.name) {
-      localStorage.setItem('userName', data.name);
-    } else {
-      const p = parseJwt(data.token);
-      if (p && p.name) localStorage.setItem('userName', p.name);
+    } catch (error) {
+      // avisa o login.html para reativar o botão e voltar o texto "Entrar"
+      if (typeof window.showLoginError === 'function') {
+        window.showLoginError(error.message || 'Falha ao entrar.');
+      } else if (msg) {
+        // fallback: mostra mensagem
+        msg.textContent = error.message || 'Falha ao entrar.';
+      }
+      // NÃO mexa em btn aqui — o login.html já faz isso
     }
-
-    window.location.href = 'index.html';
   });
 }
+
+// export se você usa no HTML
+window.bindLogin = bindLogin;
 
 // ================== CALL (ADMIN) ==================
 function bindPublishCall() {

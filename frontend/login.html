@@ -219,12 +219,18 @@
     });
 
     // Mostrar/ocultar senha
-    const pwdInput = document.querySelector('input[name="password"]');
-    document.getElementById('togglePwd').addEventListener('click', () => {
-      const isPwd = pwdInput.type === 'password';
-      pwdInput.type = isPwd ? 'text' : 'password';
-      document.querySelector('#togglePwd i').className = isPwd ? 'bi bi-eye-slash' : 'bi bi-eye';
-    });
+    const pwdInput = document.querySelector('#loginForm input[name="password"]');
+const toggleBtn = document.getElementById('togglePwd');
+
+if (pwdInput && toggleBtn) {
+  toggleBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const isPwd = pwdInput.type === 'password';
+    pwdInput.type = isPwd ? 'text' : 'password';
+    toggleBtn.querySelector('i').className = isPwd ? 'bi bi-eye-slash' : 'bi bi-eye';
+  });
+}
+
 
     // Integra com seu app.js (bindLogin) e garante que o CPF vai sem pontuação
     function wrapBindLogin() {
