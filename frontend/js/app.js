@@ -564,6 +564,97 @@ async function registerUser({ name, cpf, email, password }) {
   return res.json();
 }
 
+// ============ AUTH: FORGOT / RESET ============
+async function requestPasswordReset({ cpfOrEmail }) {
+  const res = await fetch(`${API}/auth/forgot`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cpfOrEmail })
+  });
+  // Sempre retorna 200 com mensagem genérica por segurança
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: 'Falha ao enviar.' }));
+    throw new Error(err.message || 'Falha ao enviar.');
+  }
+  return res.json();
+}
+
+async function resetPassword({ token, password }) {
+  const res = await fetch(`${API}/auth/reset`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, password })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: 'Falha ao redefinir.' }));
+    throw new Error(err.message || 'Falha ao redefinir.');
+  }
+  return res.json();
+}
+// ========= PERFIL LOGADO =========
+async function me() {
+  const res = await fetch(`${API}/auth/me`, { headers: authHeader() });
+  if (!res.ok) throw new Error('Falha ao obter perfil');
+  return res.json();
+}
+
+// ========= USERS API (ADMIN) =========
+async function listUsers({ role } = {}) {
+  const url = new URL(`${API}/users`, location.origin);
+  if (role) url.searchParams.set('role', role);
+  const res = await fetch(url.toString().replace(location.origin, ''), { headers: authHeader() });
+  if (!res.ok) throw new Error('Falha ao listar usuários');
+  return res.json();
+}
+async function getUser(id) {
+  const res = await fetch(`${API}/users/${id}`, { headers: authHeader() });
+  if (!res.ok) throw new Error('Falha ao obter usuário');
+  return res.json();
+}
+async function createUser(payload) {
+  const res = await fetch(`${API}/users`, {
+    method: 'POST', headers: { 'Content-Type':'application/json', ...authHeader() },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error('Falha ao criar usuário');
+  return res.json();
+}
+async function updateUser(id, payload) {
+  const res = await fetch(`${API}/users/${id}`, {
+    method: 'PUT', headers: { 'Content-Type':'application/json', ...authHeader() },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error('Falha ao atualizar usuário');
+  return res.json();
+}
+async function deleteUser(id) {
+  const res = await fetch(`${API}/users/${id}`, {
+    method: 'DELETE', headers: authHeader()
+  });
+  if (!res.ok) throw new Error('Falha ao excluir usuário');
+  return true;
+}
+function qs(param, value) {
+  return value ? `?${param}=${encodeURIComponent(value)}` : '';
+}
+async function downloadUsersReport(role) {
+  const url = `${API}/users/report.csv${role ? qs('role', role) : ''}`;
+  const res = await fetch(url, { headers: authHeader() });
+  if (!res.ok) {
+    const txt = await res.text().catch(() => '');
+    throw new Error(`Falha ao baixar relatório (${res.status}). ${txt}`);
+  }
+  const blob = await res.blob();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `usuarios${role ? `_${role.toLowerCase()}` : ''}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(a.href);
+}
+
+
 
 
 // ================== BOOT ==================
@@ -585,3 +676,14 @@ window.loadAllCalls = loadAllCalls;
 window.bindPublishApproved = bindPublishApproved;
 window.goPublishApproved = goPublishApproved;
 window.registerUser = registerUser;
+window.me = me;
+window.listUsers = listUsers;
+window.getUser = getUser;
+window.createUser = createUser;
+window.updateUser = updateUser;
+window.deleteUser = deleteUser;
+window.downloadUsersReport = downloadUsersReport;
+
+// Expõe no escopo global
+window.requestPasswordReset = requestPasswordReset;
+window.resetPassword = resetPassword;

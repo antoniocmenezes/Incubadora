@@ -3,12 +3,17 @@ import { Router } from 'express';
 import { pool } from '../config/db.js';
 
 // controllers
-import { login, register } from '../controllers/authController.js';
+import { login, register, meCtrl } from '../controllers/authController.js';
 import { publishCall, getCalls, getCallById } from '../controllers/callsController.js';
 import { createProjectCtrl } from '../controllers/projectsController.js';
 import { listSubmissionsCtrl, submitProjectCtrl } from '../controllers/submissionsController.js'; // <- UM ÚNICO import
 import { evaluateSubmissionCtrl } from '../controllers/evaluationsController.js';
 import { publishApprovedProjectCtrl, listPublicationsCtrl } from '../controllers/publicationsController.js';
+import { forgotPassword, resetPassword } from '../controllers/authController.js';
+import {
+  listUsersCtrl, getUserCtrl, createUserCtrl,
+  updateUserCtrl, deleteUserCtrl, usersReportCtrl
+} from '../controllers/usersController.js';
 
 // middlewares
 import { authRequired, requireRole } from '../middlewares/auth.js';
@@ -34,6 +39,21 @@ router.get('/db-ping', async (_req, res) => {
 // ========================
 router.post('/auth/login', login);
 router.post('/auth/register', register); // << nova rota pública
++router.get('/auth/me', authRequired, meCtrl);
+ router.post('/auth/forgot', forgotPassword);
+ router.post('/auth/reset', resetPassword);
+
+// ========================
+// RF003 - Manter usuário
+// ========================
+// Relatório (CSV)
+router.get('/users/report.csv', authRequired, requireRole('ADMIN'), usersReportCtrl);
+// Rotas de administração de usuários (somente ADMIN)
+router.get('/users', authRequired, requireRole('ADMIN'), listUsersCtrl);
+router.get('/users/:id', authRequired, requireRole('ADMIN'), getUserCtrl);
+router.post('/users', authRequired, requireRole('ADMIN'), createUserCtrl);
+router.put('/users/:id', authRequired, requireRole('ADMIN'), updateUserCtrl);
+router.delete('/users/:id', authRequired, requireRole('ADMIN'), deleteUserCtrl);
 
 // =====================================
 // RF004 - Projeto & Submissão (ALUNO)
@@ -60,5 +80,8 @@ router.get('/calls/open', (req, res) => { req.query.status = 'open'; return getC
 // =========================================
 router.post('/publications', authRequired, requireRole('ADMIN'), uploadLogo, publishApprovedProjectCtrl);
 router.get('/publications', listPublicationsCtrl);
+
+router.post('/auth/forgot', forgotPassword);
+router.post('/auth/reset', resetPassword);
 
 export default router;
