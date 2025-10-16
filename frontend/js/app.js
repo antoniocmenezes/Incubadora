@@ -56,6 +56,53 @@ function injectAdminNav() {
   }
 }
 
+function injectStudentNav() {
+  const u = currentUser();
+  const slot = document.getElementById('studentNav');
+
+  // Se houver slot, preenche/oculta nele
+  if (slot) {
+    if (u?.role === 'ALUNO') {
+      slot.classList.remove('d-none');
+      const active = isActivePage('my_projects.html') ? 'active' : '';
+      slot.innerHTML = `
+        <a class="nav-link ${active}" href="my_projects.html" title="Ver meus projetos">
+          <i class="bi bi-kanban"></i> Meus Projetos
+        </a>
+      `;
+    } else {
+      slot.classList.add('d-none');
+      slot.innerHTML = '';
+    }
+    return; // já resolveu via slot
+  }
+
+  // Plano B: append no primeiro .navbar-nav encontrado
+  const nav = document.querySelector('#navMain .navbar-nav, #mainNav .navbar-nav, nav .navbar-nav');
+  if (!nav) return;
+
+  // Evitar duplicação
+  if (nav.querySelector('[data-nav="my-projects"]')) return;
+
+  if (u?.role === 'ALUNO') {
+    const li = document.createElement('li');
+    li.className = 'nav-item';
+    li.dataset.nav = 'my-projects';
+    const active = isActivePage('my_projects.html') ? 'active' : '';
+    li.innerHTML = `
+      <a class="nav-link ${active}" href="my_projects.html">
+        <i class="bi bi-kanban"></i> Meus Projetos
+      </a>`;
+    nav.appendChild(li);
+  }
+}
+
+function isActivePage(fileName) {
+  const p = (location.pathname || '').toLowerCase();
+  return p.endsWith('/' + fileName.toLowerCase()) || p.endsWith(fileName.toLowerCase());
+}
+
+
 // (se quiser revalidar ao trocar de página)
 document.addEventListener('DOMContentLoaded', injectAdminNav);
 
@@ -94,6 +141,7 @@ function renderAuthArea() {
 
   // <- garante o botão de avaliações na navbar conforme o papel
   injectAdminNav();
+  injectStudentNav();
 }
 
 

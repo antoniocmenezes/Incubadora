@@ -155,16 +155,28 @@
       </button>
       <div class="collapse navbar-collapse" id="navMain">
         <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-          <li class="nav-item"><a class="nav-link" href="index.html#editais"><i class="bi bi-megaphone"></i> Editais</a>
-          </li>
-          <li class="nav-item"><a class="nav-link" href="index.html#aprovados"><i class="bi bi-stars"></i> Aprovados</a>
-          </li>
-          <li class="nav-item"><a class="nav-link" href="index.html#sobre"><i class="bi bi-info-circle"></i> Sobre</a>
-          </li>
-          <li class="nav-item ms-lg-3" id="authArea">
-            <a href="login.html" class="btn btn-login btn-sm px-3"><i class="bi bi-box-arrow-in-right"></i> Entrar</a>
-          </li>
-        </ul>
+  <li class="nav-item" data-admin-only style="display:none;">
+    <a class="nav-link" href="users.html">
+      <i class="bi bi-people-gear me-1"></i> Gerenciar Usuários
+    </a>
+  </li>
+
+  <!-- Slots dinâmicos -->
+  <li id="studentNav" class="nav-item d-none"></li>
+  <li id="evalNav" class="nav-item d-none"></li>
+
+  <li class="nav-item"><a class="nav-link" href="#editais"><i class="bi bi-megaphone"></i> Editais</a></li>
+  <li class="nav-item"><a class="nav-link" href="#aprovados"><i class="bi bi-stars"></i> Aprovados</a></li>
+  <li class="nav-item"><a class="nav-link" href="#sobre"><i class="bi bi-info-circle"></i> Sobre</a></li>
+
+  <!-- Área dinâmica de autenticação -->
+  <li class="nav-item ms-lg-3" id="authArea">
+    <a href="login.html" class="btn btn-login btn-sm px-3">
+      <i class="bi bi-box-arrow-in-right"></i> Entrar
+    </a>
+  </li>
+  <li class="nav-item ms-lg-3" id="authArea2"></li>
+</ul>
       </div>
     </div>
   </nav>

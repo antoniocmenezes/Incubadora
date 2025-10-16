@@ -19,6 +19,9 @@ import {
 import { authRequired, requireRole } from '../middlewares/auth.js';
 import { uploadLogo } from '../middlewares/upload.js';
 
+
+import { listMyProjectsCtrl } from '../controllers/projectsController.js'; // ajuste o caminho conforme seu projeto
+
 const router = Router();
 
 // sanity
@@ -83,5 +86,10 @@ router.get('/publications', listPublicationsCtrl);
 
 router.post('/auth/forgot', forgotPassword);
 router.post('/auth/reset', resetPassword);
+
+router.get('/students/me/projects',
+  authRequired, requireRole('ALUNO'),
+  listMyProjectsCtrl
+);
 
 export default router;
