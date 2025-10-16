@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="pt-br">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -13,52 +14,134 @@
     /* =========================
        Paleta YpeTec (amarelo / preto / branco)
        ========================= */
-    :root{
-      --brand-yellow:#ffd400; --brand-yellow-600:#f2c200; --brand-yellow-700:#e3b400;
-      --brand-black:#0a0a0a; --brand-white:#ffffff;
-      --ink-1:#0b0f19; --ink-2:#1f2937; --ink-3:#4b5563;
-      --bg-1:#ffffff; --surface:#ffffff; --ring:rgba(10,10,10,.10);
+    :root {
+      --brand-yellow: #ffd400;
+      --brand-yellow-600: #f2c200;
+      --brand-yellow-700: #e3b400;
+      --brand-black: #0a0a0a;
+      --brand-white: #ffffff;
+      --ink-1: #0b0f19;
+      --ink-2: #1f2937;
+      --ink-3: #4b5563;
+      --bg-1: #ffffff;
+      --surface: #ffffff;
+      --ring: rgba(10, 10, 10, .10);
     }
 
-    html,body{height:100%; background:var(--bg-1); color:var(--ink-2);}
-    body{
-      background-image:
-        radial-gradient(900px 600px at 12% 10%, rgba(255,212,0,.08), transparent 60%),
-        radial-gradient(900px 600px at 90% -10%, rgba(0,0,0,.05), transparent 55%);
-      background-attachment:fixed;
+    html,
+    body {
+      height: 100%;
+      background: var(--bg-1);
+      color: var(--ink-2);
     }
-    h1,h2,h3,h4,h5,h6{color:var(--ink-1);}
-    .text-ink-3{color:var(--ink-3);}
+
+    body {
+      background-image:
+        radial-gradient(900px 600px at 12% 10%, rgba(255, 212, 0, .08), transparent 60%),
+        radial-gradient(900px 600px at 90% -10%, rgba(0, 0, 0, .05), transparent 55%);
+      background-attachment: fixed;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      color: var(--ink-1);
+    }
+
+    .text-ink-3 {
+      color: var(--ink-3);
+    }
 
     /* Navbar */
-    .navbar{background:var(--brand-black)!important; border-bottom:3px solid var(--brand-yellow);}
-    .navbar .navbar-brand, .navbar .nav-link{color:#fff!important;}
-    .navbar .nav-link:hover{color:var(--brand-yellow)!important;}
-    .btn-login{background:var(--brand-yellow); color:#111!important; border:0; font-weight:700;}
-    .btn-login:hover{filter:brightness(.95);}
+    .navbar {
+      background: var(--brand-black) !important;
+      border-bottom: 3px solid var(--brand-yellow);
+    }
+
+    .navbar .navbar-brand,
+    .navbar .nav-link {
+      color: #fff !important;
+    }
+
+    .navbar .nav-link:hover {
+      color: var(--brand-yellow) !important;
+    }
+
+    .btn-login {
+      background: var(--brand-yellow);
+      color: #111 !important;
+      border: 0;
+      font-weight: 700;
+    }
+
+    .btn-login:hover {
+      filter: brightness(.95);
+    }
 
     /* Cards / glass */
-    .glass{background:var(--surface); border:1px solid var(--ring); border-radius:16px;}
-    .card-elev{transition:transform .25s ease, box-shadow .25s ease;}
-    .card-elev:hover{transform:translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,.10);}
+    .glass {
+      background: var(--surface);
+      border: 1px solid var(--ring);
+      border-radius: 16px;
+    }
+
+    .card-elev {
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+
+    .card-elev:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, .10);
+    }
 
     /* Botões */
-    .btn-brand{
-      background:linear-gradient(90deg, var(--brand-yellow), var(--brand-yellow-600));
-      color:#111; border:none; font-weight:700;
+    .btn-brand {
+      background: linear-gradient(90deg, var(--brand-yellow), var(--brand-yellow-600));
+      color: #111;
+      border: none;
+      font-weight: 700;
     }
-    .btn-brand:hover{background:linear-gradient(90deg, var(--brand-yellow-600), var(--brand-yellow-700));}
-    .btn-ghost{border:2px solid var(--brand-black); color:var(--brand-black); background:transparent; font-weight:700;}
-    .btn-ghost:hover{background:var(--brand-black); color:#fff;}
+
+    .btn-brand:hover {
+      background: linear-gradient(90deg, var(--brand-yellow-600), var(--brand-yellow-700));
+    }
+
+    .btn-ghost {
+      border: 2px solid var(--brand-black);
+      color: var(--brand-black);
+      background: transparent;
+      font-weight: 700;
+    }
+
+    .btn-ghost:hover {
+      background: var(--brand-black);
+      color: #fff;
+    }
 
     /* Inputs */
-    .form-control, .form-select{border-radius:12px; border:1px solid var(--ring);}
-    .badge-soft{background:rgba(10,10,10,.06); border:1px solid var(--ring); border-radius:24px; padding:.25rem .6rem;}
+    .form-control,
+    .form-select {
+      border-radius: 12px;
+      border: 1px solid var(--ring);
+    }
+
+    .badge-soft {
+      background: rgba(10, 10, 10, .06);
+      border: 1px solid var(--ring);
+      border-radius: 24px;
+      padding: .25rem .6rem;
+    }
 
     /* Header / filtros */
-    .filters .form-select{max-width:240px;}
+    .filters .form-select {
+      max-width: 240px;
+    }
   </style>
 </head>
+
 <body>
   <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg sticky-top">
@@ -71,28 +154,28 @@
       </button>
       <div class="collapse navbar-collapse" id="navMain">
         <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-  <li class="nav-item" data-admin-only style="display:none;">
-    <a class="nav-link" href="users.html">
-      <i class="bi bi-people-gear me-1"></i> Gerenciar Usuários
-    </a>
-  </li>
+          <li class="nav-item" data-admin-only style="display:none;">
+            <a class="nav-link" href="users.html">
+              <i class="bi bi-people-gear me-1"></i> Gerenciar Usuários
+            </a>
+          </li>
 
-  <!-- Slots dinâmicos -->
-  <li id="studentNav" class="nav-item d-none"></li>
-  <li id="evalNav" class="nav-item d-none"></li>
+          <!-- Slots dinâmicos -->
+          <li id="studentNav" class="nav-item d-none"></li>
+          <li id="evalNav" class="nav-item d-none"></li>
 
-  <li class="nav-item"><a class="nav-link" href="#editais"><i class="bi bi-megaphone"></i> Editais</a></li>
-  <li class="nav-item"><a class="nav-link" href="#aprovados"><i class="bi bi-stars"></i> Aprovados</a></li>
-  <li class="nav-item"><a class="nav-link" href="#sobre"><i class="bi bi-info-circle"></i> Sobre</a></li>
+          <li class="nav-item"><a class="nav-link" href="#editais"><i class="bi bi-megaphone"></i> Editais</a></li>
+          <li class="nav-item"><a class="nav-link" href="#aprovados"><i class="bi bi-stars"></i> Aprovados</a></li>
+          <li class="nav-item"><a class="nav-link" href="#sobre"><i class="bi bi-info-circle"></i> Sobre</a></li>
 
-  <!-- Área dinâmica de autenticação -->
-  <li class="nav-item ms-lg-3" id="authArea">
-    <a href="login.html" class="btn btn-login btn-sm px-3">
-      <i class="bi bi-box-arrow-in-right"></i> Entrar
-    </a>
-  </li>
-  <li class="nav-item ms-lg-3" id="authArea2"></li>
-</ul>
+          <!-- Área dinâmica de autenticação -->
+          <li class="nav-item ms-lg-3" id="authArea">
+            <a href="login.html" class="btn btn-login btn-sm px-3">
+              <i class="bi bi-box-arrow-in-right"></i> Entrar
+            </a>
+          </li>
+          <li class="nav-item ms-lg-3" id="authArea2"></li>
+        </ul>
       </div>
     </div>
   </nav>
@@ -146,7 +229,7 @@
     //function token(){ return localStorage.getItem('token'); }
     //function authHeader(){ const t = token(); return t ? { 'Authorization':'Bearer '+t } : {}; }
 
-    function showAlert(type, text){
+    function showAlert(type, text) {
       const box = document.getElementById('alertBox');
       box.className = 'alert alert-' + type;
       box.textContent = text;
@@ -154,25 +237,25 @@
       setTimeout(() => box.classList.add('d-none'), 3000);
     }
 
-    function statusBadge(s){
+    function statusBadge(s) {
       if (!s) return '';
-      const map = { APROVADO:'success', REPROVADO:'danger', NECESSITA_AJUSTES:'warning' };
+      const map = { APROVADO: 'success', REPROVADO: 'danger', NECESSITA_AJUSTES: 'warning' };
       const cls = map[s] || 'secondary';
-      return `<span class="badge text-bg-${cls}">${s.replace('_',' ')}</span>`;
+      return `<span class="badge text-bg-${cls}">${s.replace('_', ' ')}</span>`;
     }
 
     // ===== Render de cards =====
-      function renderSubmissions(list = []){
-    const grid = document.getElementById('subsGrid');
-    if (!Array.isArray(list) || list.length === 0){
-      grid.innerHTML = `
+    function renderSubmissions(list = []) {
+      const grid = document.getElementById('subsGrid');
+      if (!Array.isArray(list) || list.length === 0) {
+        grid.innerHTML = `
         <div class="col-12">
           <div class="glass p-4 text-center text-ink-3">Nenhuma submissão encontrada.</div>
         </div>`;
-      return;
-    }
+        return;
+      }
 
-    const isAdmin = (typeof currentRole === 'function' && currentRole() === 'ADMIN');
+      const isAdmin = (typeof currentRole === 'function' && currentRole() === 'ADMIN');
 
       grid.innerHTML = list.map(item => {
         // Estrutura esperada do item (ajuste conforme seu backend):
@@ -182,11 +265,11 @@
         const area = item.project_area ?? '';
         const lastStatus = item?.evaluation_status || item?.status || null;
         const isApproved = String(lastStatus || '').toUpperCase() === 'APROVADO';
-      const publishBtn = (isApproved && isAdmin)
-        ? `<button class="btn btn-ghost btn-sm mt-2" onclick="goPublishApproved(${item.project_id}, ${item.id})">
+        const publishBtn = (isApproved && isAdmin)
+          ? `<button class="btn btn-ghost btn-sm mt-2" onclick="goPublishApproved(${item.project_id}, ${item.id})">
              <i class="bi bi-megaphone"></i> Publicar projeto
            </button>`
-        : '';
+          : '';
 
         return `
           <div class="col-12 col-md-6 col-lg-4">
@@ -202,6 +285,12 @@
                 ${item.id ? ` • <i class="bi bi-upload"></i> Submissão #${item.id}` : ''}
               </div>
               <p class="mb-3">${summary ? summary : ''}</p>
+<details class="mt-auto mb-2" data-role="comments" data-submission="${item.id}">
+  <summary class="small fw-semibold">
+    <i class="bi bi-chat-dots"></i> Comentários anteriores
+  </summary>
+  <div class="mt-2 small">Carregando comentários…</div>
+</details>
 
               <form class="mt-auto vstack gap-2 eval-form" data-submission="${item.id}">
                 <div>
@@ -228,6 +317,32 @@
         `;
       }).join('');
 
+      hydrateComments(list);
+
+async function fetchComments(submissionId) {
+  const resp = await fetch(`${API}/evaluations?submission_id=${submissionId}`, { headers: { ...authHeader() } });
+  if (!resp.ok) throw new Error('Erro ao buscar comentários');
+  return resp.json();
+}
+
+function hydrateComments(items = []) {
+  const tasks = items.map(async (it) => {
+    const details = document.querySelector(`details[data-role="comments"][data-submission="${it.id}"]`);
+    if (!details) return;
+    try {
+      const comments = await fetchComments(it.id);
+      const box = details.querySelector('div');
+      box.innerHTML = commentsListHTML(comments);
+    } catch (e) {
+      const box = details.querySelector('div');
+      if (box) box.innerHTML = `<span class="text-danger">Não foi possível carregar os comentários.</span>`;
+      console.error(e);
+    }
+  });
+  Promise.allSettled(tasks);
+}
+
+
       // liga os submits de cada card
       grid.querySelectorAll('.eval-form').forEach(form => {
         form.addEventListener('submit', async (e) => {
@@ -235,7 +350,7 @@
           const msg = form.querySelector('[data-role="msg"]');
           msg.textContent = '';
 
-          if (!token()){
+          if (!token()) {
             msg.className = 'small text-danger';
             msg.textContent = 'Faça login como ADMIN.';
             return;
@@ -252,12 +367,12 @@
           try {
             const res = await fetch(`${API}/evaluations`, {
               method: 'POST',
-              headers: { 'Content-Type':'application/json', ...authHeader() },
+              headers: { 'Content-Type': 'application/json', ...authHeader() },
               body: JSON.stringify(payload)
             });
             const data = await res.json();
 
-            if (!res.ok){
+            if (!res.ok) {
               msg.className = 'small text-danger';
               msg.textContent = data?.error || 'Erro ao salvar';
               return;
@@ -266,6 +381,14 @@
             msg.className = 'small text-success';
             msg.textContent = `Avaliação salva! ID ${data.id ?? ''}`;
             showAlert('success', 'Avaliação registrada com sucesso.');
+            // após sucesso:
+const updated = await fetchComments(submission_id);
+const details = document.querySelector(`details[data-role="comments"][data-submission="${submission_id}"]`);
+if (details) {
+  const box = details.querySelector('div');
+  if (box) box.innerHTML = commentsListHTML(updated);
+}
+
           } catch (err) {
             console.error(err);
             msg.className = 'small text-danger';
@@ -276,7 +399,7 @@
     }
 
     // ===== Carregamento de submissões =====
-    async function loadSubmissions(){
+    async function loadSubmissions() {
       const sel = document.getElementById('statusFilter');
       const filter = sel?.value || 'all';
 
@@ -284,16 +407,16 @@
       if (filter === 'pending') url = `${API}/submissions?status=pending`;
       if (filter === 'evaluated') url = `${API}/submissions?status=evaluated`;
 
-      try{
-        const resp = await fetch(url, { headers: { ...authHeader() }});
+      try {
+        const resp = await fetch(url, { headers: { ...authHeader() } });
         const data = await resp.json();
-        if (!resp.ok){
+        if (!resp.ok) {
           showAlert('danger', data?.error || 'Erro ao carregar submissões');
           renderSubmissions([]);
           return;
         }
         renderSubmissions(Array.isArray(data) ? data : (data.items || []));
-      }catch(e){
+      } catch (e) {
         console.error(e);
         showAlert('danger', 'Falha ao carregar submissões.');
         renderSubmissions([]);
@@ -312,6 +435,36 @@
       // primeira carga
       loadSubmissions();
     });
+
+    function commentsListHTML(comments = []) {
+  if (!Array.isArray(comments) || comments.length === 0) {
+    return `<div class="small text-ink-3">Sem comentários anteriores.</div>`;
+  }
+  const toBadge = (s) => {
+    const map = { APROVADO:'success', REPROVADO:'danger', NECESSITA_AJUSTES:'warning' };
+    return `<span class="badge text-bg-${map[s] || 'secondary'}">${(s||'').replace('_',' ')}</span>`;
+  };
+  return `
+    <ul class="list-unstyled m-0">
+      ${comments.map(c => {
+        const when = c.evaluated_at || c.created_at; // ✅ usa a coluna certa
+        return `
+          <li class="border rounded p-2 mb-2">
+            <div class="d-flex justify-content-between align-items-start gap-2">
+              <div class="fw-semibold">${c.evaluator_name || 'Avaliador'}</div>
+              ${toBadge(String(c.status || '').toUpperCase())}
+            </div>
+            <div class="small text-ink-3">${when ? new Date(when).toLocaleString() : ''}</div>
+            <div class="mt-1">${(c.comments || '').replace(/\n/g,'<br/>')}</div>
+          </li>
+        `;
+      }).join('')}
+    </ul>
+  `;
+}
+
+
   </script>
 </body>
+
 </html>

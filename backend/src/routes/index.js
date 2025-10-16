@@ -7,7 +7,7 @@ import { login, register, meCtrl } from '../controllers/authController.js';
 import { publishCall, getCalls, getCallById } from '../controllers/callsController.js';
 import { createProjectCtrl } from '../controllers/projectsController.js';
 import { listSubmissionsCtrl, submitProjectCtrl } from '../controllers/submissionsController.js'; // <- UM ÚNICO import
-import { evaluateSubmissionCtrl } from '../controllers/evaluationsController.js';
+import { evaluateSubmissionCtrl, getBySubmissionCtrl } from '../controllers/evaluationsController.js';
 import { publishApprovedProjectCtrl, listPublicationsCtrl } from '../controllers/publicationsController.js';
 import { forgotPassword, resetPassword } from '../controllers/authController.js';
 import {
@@ -42,9 +42,9 @@ router.get('/db-ping', async (_req, res) => {
 // ========================
 router.post('/auth/login', login);
 router.post('/auth/register', register); // << nova rota pública
-+router.get('/auth/me', authRequired, meCtrl);
- router.post('/auth/forgot', forgotPassword);
- router.post('/auth/reset', resetPassword);
+router.get('/auth/me', authRequired, meCtrl);
+router.post('/auth/forgot', forgotPassword);
+router.post('/auth/reset', resetPassword);
 
 // ========================
 // RF003 - Manter usuário
@@ -69,6 +69,7 @@ router.post('/submissions', authRequired, requireRole('ALUNO'), submitProjectCtr
 // =============================
 router.get('/submissions', authRequired, requireRole('ADMIN'), listSubmissionsCtrl); // GET para listar
 router.post('/evaluations', authRequired, requireRole('ADMIN'), evaluateSubmissionCtrl);
+router.get('/evaluations', authRequired, requireRole('ADMIN'), getBySubmissionCtrl);
 
 // ========================
 // RF006 - Editais (ADMIN)
