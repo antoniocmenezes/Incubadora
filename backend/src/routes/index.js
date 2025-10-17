@@ -10,6 +10,7 @@ import { listSubmissionsCtrl, submitProjectCtrl } from '../controllers/submissio
 import { evaluateSubmissionCtrl, getBySubmissionCtrl } from '../controllers/evaluationsController.js';
 import { publishApprovedProjectCtrl, listPublicationsCtrl } from '../controllers/publicationsController.js';
 import { forgotPassword, resetPassword } from '../controllers/authController.js';
+import { requestDisengagementCtrl } from '../controllers/projectsController.js';
 import {
   listUsersCtrl, getUserCtrl, createUserCtrl,
   updateUserCtrl, deleteUserCtrl, usersReportCtrl
@@ -63,6 +64,11 @@ router.delete('/users/:id', authRequired, requireRole('ADMIN'), deleteUserCtrl);
 // =====================================
 router.post('/projects', authRequired, requireRole('ALUNO'), createProjectCtrl);
 router.post('/submissions', authRequired, requireRole('ALUNO'), submitProjectCtrl);
+router.post(
+  '/projects/:id/disengage',
+  authRequired, requireRole('ALUNO'),
+  requestDisengagementCtrl
+);
 
 // =============================
 // RF005 - Avaliação (ADMIN)
@@ -92,5 +98,7 @@ router.get('/students/me/projects',
   authRequired, requireRole('ALUNO'),
   listMyProjectsCtrl
 );
+
+
 
 export default router;

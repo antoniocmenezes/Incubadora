@@ -109,3 +109,26 @@ function mapStatusLabel(r) {
   if (r.project_status === 'REPROVADO')             return 'Reprovado';
   return 'Rascunho';
 }
+
+export async function isProjectOwnedByUser(projectId, userId) {
+  const [rows] = await pool.query(
+    'SELECT id FROM projects WHERE id = ? AND owner_user_id = ? LIMIT 1',
+    [projectId, userId]
+  );
+  return rows.length > 0;
+}
+
+// Soft delete: DESLIGADO + deleted_at = NOW()
+// Permita desligar quando fizer sentido no seu fluxo (ex.: INCUBADO/APROVADO)
+export async function markProjectAsDisengaged(projectId, userId, reason = null) {
+  const [result] = await pool.query(
+    `UPDATE projects
+       SET status = 'DESLIGADO',
+           deleted_at = NOW()
+     WHERE id = ?
+       AND owner_user_id = ?
+       AND status IN ('INCUBADO','APROVADO','SUBMETIDO','PRE_SUBMISSAO','AJUSTES','INATIVO')`,
+    [projectId, userId]
+  );
+  return result.affectedRows > 0;
+}

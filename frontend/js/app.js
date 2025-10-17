@@ -815,7 +815,152 @@ async function downloadUsersReport(role) {
   URL.revokeObjectURL(a.href);
 }
 
+// ===== Desligamento de Projeto (ALUNO) =====
+function showGlobalMsg(text, type = 'success') {
+  const wrap = document.getElementById('globalMsg');
+  if (!wrap) return;
+  const id = 'msg_' + Date.now();
+  wrap.insertAdjacentHTML('beforeend', `
+    <div id="${id}" class="alert alert-${type} shadow-sm border-0 py-2 px-3">
+      ${text}
+    </div>
+  `);
+  setTimeout(() => document.getElementById(id)?.remove(), 3500);
+}
 
+let __disengageModal;
+function getDisengageModal() {
+  if (!__disengageModal) {
+    const el = document.getElementById('disengageModal');
+    if (!el) return null;
+    __disengageModal = new bootstrap.Modal(el);
+  }
+  return __disengageModal;
+}
+
+function openDisengageModal(projectId, projectTitle) {
+  const idInput = document.getElementById('disengageProjectId');
+  const titleP  = document.getElementById('disengageProjectTitle');
+  const reason  = document.getElementById('disengageReason');
+  if (idInput) idInput.value = projectId;
+  if (titleP)  titleP.textContent = `Projeto: ${projectTitle}`;
+  if (reason)  reason.value = '';
+  getDisengageModal()?.show();
+}
+
+async function requestDisengagement(projectId, reasonText) {
+  const res = await fetch(`${API}/projects/${projectId}/disengage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    body: JSON.stringify({ reason: reasonText || null })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.error || data.message || `Falha ao solicitar desligamento (${res.status}).`);
+  }
+  return data;
+}
+
+function removeProjectCardFromUI(projectId) {
+  const card = document.querySelector(`.project-card[data-project-id="${projectId}"]`);
+  if (card) card.remove();
+}
+
+function bindDisengageButtons() {
+  document.querySelectorAll('.btn-disengage').forEach(btn => {
+    btn.onclick = () => {
+      const projectId = btn.getAttribute('data-project-id');
+      const projectTitle = btn.getAttribute('data-project-title') || 'Projeto';
+      openDisengageModal(projectId, projectTitle);
+    };
+  });
+
+  const confirmBtn = document.getElementById('confirmDisengageBtn');
+  if (confirmBtn && !confirmBtn.dataset.bound) {
+    confirmBtn.dataset.bound = '1';
+    confirmBtn.addEventListener('click', async () => {
+      const idInput = document.getElementById('disengageProjectId');
+      const reason  = document.getElementById('disengageReason');
+      const projectId = idInput ? idInput.value : null;
+      const reasonText = reason ? reason.value.trim() : '';
+      if (!projectId) return;
+
+      confirmBtn.disabled = true;
+      try {
+        await requestDisengagement(projectId, reasonText);
+        getDisengageModal()?.hide();
+        removeProjectCardFromUI(projectId);
+        showGlobalMsg('Solicitação de desligamento enviada com sucesso.', 'success');
+      } catch (err) {
+        showGlobalMsg(err.message || 'Erro ao solicitar desligamento.', 'danger');
+      } finally {
+        confirmBtn.disabled = false;
+      }
+    });
+  }
+}
+
+// expõe para o HTML chamar após renderizar os cards
+window.bindDisengageButtons = bindDisengageButtons;
+
+// ============ MY PROJECTS (ALUNO) ============
+async function loadMyProjects() {
+  const listBox = document.getElementById('myProjectsList');
+  const emptyMsg = document.getElementById('myProjectsEmpty');
+
+  // Precisa de token e perfil ALUNO
+  const u = currentUser();
+  if (!u || u.role !== 'ALUNO') {
+    if (emptyMsg) emptyMsg.classList.remove('d-none');
+    if (listBox) listBox.innerHTML = '';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/students/me/projects`, {
+      headers: { ...authHeader(), 'cache-control': 'no-store' }
+    });
+
+    // Tratativas de auth
+    if (res.status === 401) {
+      // sem login → manda pra login
+      location.href = 'login.html';
+      return;
+    }
+    if (res.status === 403) {
+      // logado mas não é ALUNO
+      if (emptyMsg) emptyMsg.textContent = 'Seu perfil não possui projetos.';
+      if (emptyMsg) emptyMsg.classList.remove('d-none');
+      if (listBox) listBox.innerHTML = '';
+      return;
+    }
+
+    const items = await res.json();
+    if (Array.isArray(items) && typeof window.renderMyProjects === 'function') {
+      window.renderMyProjects(items);
+    } else {
+      // fallback visual simples
+      if (!Array.isArray(items) || items.length === 0) {
+        if (emptyMsg) emptyMsg.classList.remove('d-none');
+        if (listBox) listBox.innerHTML = '';
+      } else {
+        if (listBox) listBox.innerHTML = items.map(it => `
+          <div class="col-12"><pre>${JSON.stringify(it, null, 2)}</pre></div>
+        `).join('');
+      }
+    }
+  } catch (err) {
+    console.error('loadMyProjects error', err);
+    if (emptyMsg) {
+      emptyMsg.textContent = 'Erro ao carregar seus projetos.';
+      emptyMsg.classList.remove('d-none');
+    }
+    if (listBox) listBox.innerHTML = '';
+  }
+}
+
+// exporta para ser usado pela página
+window.loadMyProjects = loadMyProjects;
 
 
 // ================== BOOT ==================
