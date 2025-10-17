@@ -240,7 +240,7 @@ async function loadApprovedProjects() {
 // ============ AUTH: LOGIN ============
 function bindLogin() {
   const form = document.getElementById('loginForm');
-  const msg  = document.getElementById('loginMsg');
+  const msg = document.getElementById('loginMsg');
   if (!form) return;
 
   form.addEventListener('submit', async (e) => {
@@ -285,33 +285,144 @@ function bindLogin() {
 // export se você usa no HTML
 window.bindLogin = bindLogin;
 
+// === MÁSCARA DD/MM/AAAA ===
+function maskDateBR(el) {
+  let v = el.value.replace(/\D/g, '').slice(0, 8); // só dígitos (limita 8)
+  if (v.length >= 5) el.value = v.replace(/(\d{2})(\d{2})(\d{0,4})/, '$1/$2/$3');
+  else if (v.length >= 3) el.value = v.replace(/(\d{2})(\d{0,2})/, '$1/$2');
+  else el.value = v;
+}
+
+// === VALIDA SE É UMA DATA BR VÁLIDA ===
+function isValidDateBR(str) {
+  // Aceita dd/mm/aaaa (4 dígitos no ano)
+  const m = str.match(/^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/(\d{4})$/);
+  if (!m) return false;
+
+  const dd = Number(m[1]);
+  const mm = Number(m[2]);
+  const yyyy = Number(m[3]);
+
+  // Defina o range que você quer permitir
+  if (yyyy < 1900 || yyyy > 9999) return false;
+
+  // Validação de data real (evita 31/02 etc.)
+  const d = new Date(yyyy, mm - 1, dd);
+  return (
+    d.getFullYear() === yyyy &&
+    d.getMonth() + 1 === mm &&
+    d.getDate() === dd
+  );
+}
+
+
+// === CONVERTE DD/MM/AAAA -> "YYYY-MM-DD HH:MM:SS" (para SQL/MySQL) ===
+// endOfDay=true coloca 23:59:59 (cobre o dia todo sem exigir hora do usuário)
+function brToSqlDateTime(str, endOfDay = false) {
+  const [dd, mm, yyyy] = str.split('/').map(Number);
+  const d = new Date(yyyy, mm - 1, dd, endOfDay ? 23 : 0, endOfDay ? 59 : 0, endOfDay ? 59 : 0);
+  const pad = (n) => String(n).padStart(2, '0');
+  const Y = d.getFullYear(), M = pad(d.getMonth() + 1), D = pad(d.getDate());
+  const h = pad(d.getHours()), m = pad(d.getMinutes()), s = pad(d.getSeconds());
+  return `${Y}-${M}-${D} ${h}:${m}:${s}`;
+}
+
 // ================== CALL (ADMIN) ==================
 function bindPublishCall() {
   const form = document.getElementById('callForm');
-  const msg = document.getElementById('callMsg');
+  const msg  = document.getElementById('callMsg');
   if (!form) return;
+
+  const submitBtn = form.querySelector('button[type="submit"]');
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     msg.textContent = '';
+    msg.classList.remove('text-danger', 'text-success');
+
     const fd = new FormData(form);
+    const title = (fd.get('title') || '').trim();
+    const description = (fd.get('description') || '').trim();
+    const startBR = (fd.get('start_at') || '').trim();
+    const endBR   = (fd.get('end_at') || '').trim();
+
+    // Validação DD/MM/AAAA
+    if (!isValidDateBR(startBR) || !isValidDateBR(endBR)) {
+      msg.textContent = 'Use datas válidas no formato dd/mm/aaaa.';
+      msg.classList.add('text-danger');
+      return;
+    }
+
+    // Ordem cronológica
+    const [sd, sm, sy] = startBR.split('/').map(Number);
+    const [ed, em, ey] = endBR.split('/').map(Number);
+    const dStart = new Date(sy, sm - 1, sd);
+    const dEnd   = new Date(ey, em - 1, ed);
+    if (dStart >= dEnd) {
+      msg.textContent = 'A data de início deve ser anterior à data de fim.';
+      msg.classList.add('text-danger');
+      return;
+    }
+
+    // Converte para DATETIME SQL (sem exigir hora do usuário)
     const payload = {
-      title: fd.get('title'),
-      description: fd.get('description'),
-      start_at: fd.get('start_at'),
-      end_at: fd.get('end_at')
+      title,
+      description,
+      start_at: brToSqlDateTime(startBR, false), // 00:00:00
+      end_at:   brToSqlDateTime(endBR, true)     // 23:59:59
     };
-    const res = await fetch(`${API}/calls`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...authHeader() },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    if (!res.ok) { msg.textContent = data.error || 'Erro'; msg.classList.replace('text-success', 'text-danger'); return; }
-    msg.textContent = `Publicado! ID ${data.id}`;
-    msg.classList.replace('text-danger', 'text-success');
-    form.reset();
+
+    try {
+      // desabilita o botão para evitar duplo clique
+      if (submitBtn) submitBtn.disabled = true;
+
+      const res = await fetch(`${API}/calls`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeader() },
+        body: JSON.stringify(payload)
+      });
+
+      // tenta parsear a resposta; se não for JSON, cria um objeto básico
+      let data;
+      try { data = await res.json(); } catch { data = {}; }
+
+      // ❌ ERRO → mostra mensagem de erro e sai
+      if (!res.ok) {
+        msg.textContent = data?.error || data?.message || `Falha ao publicar (HTTP ${res.status}).`;
+        msg.classList.add('text-danger');
+        return;
+      }
+
+      // ✅ SUCESSO → troca a tela por mensagem de sucesso (Opção A)
+      const container = document.getElementById('callContainer');
+      if (container) {
+        container.innerHTML = `
+          <div class="alert alert-success text-center p-4 mb-0">
+            <i class="bi bi-check-circle"></i>
+            Edital publicado com sucesso! ID ${data.id ?? ''}
+          </div>
+        `;
+      } else {
+        // Fallback (se não houver container): limpa form e mostra mensagem verde
+        form.reset();
+        msg.textContent = `Edital publicado com sucesso! ID ${data.id ?? ''}`;
+        msg.classList.add('text-success');
+        // se usar classes de validação, limpe-as:
+        form.classList.remove('was-validated');
+        form.querySelectorAll('.is-valid, .is-invalid')
+            .forEach(el => el.classList.remove('is-valid', 'is-invalid'));
+      }
+
+    } catch (err) {
+      msg.textContent = 'Falha inesperada ao publicar.';
+      msg.classList.add('text-danger');
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
   });
 }
+
+
 
 // ================== PROJECT + SUBMISSION ==================
 function bindCreateProjectAndSubmit() {
@@ -411,8 +522,8 @@ function bindCreateProjectAndSubmit() {
       projMsg.classList.add('text-danger');
     }
     // Dentro do sucesso da submissão:
-projForm.classList.add('d-none');        // esconde o formulário
-document.getElementById('successMessage').classList.remove('d-none'); // mostra mensagem
+    projForm.classList.add('d-none');        // esconde o formulário
+    document.getElementById('successMessage').classList.remove('d-none'); // mostra mensagem
 
   });
 }
@@ -475,6 +586,8 @@ function renderCalls(calls = []) {
             ${c.status ? `<span class="badge badge-soft">${c.status}</span>` : ''}
             ${c.start_at ? `<div class="small text-ink-3 mt-2"><i class="bi bi-calendar-event"></i> Início: ${new Date(c.start_at).toLocaleDateString()}</div>` : ''}
             ${c.end_at ? `<div class="small text-ink-3"><i class="bi bi-hourglass-split"></i> Fim: ${new Date(c.end_at).toLocaleDateString()}</div>` : ''}
+            <span class="small text-ink-3 d-block mt-2 text-end"><strong>Clique para mais detalhes</strong></span>
+
           </div>
         </div>
       </a>
@@ -661,7 +774,7 @@ async function getUser(id) {
 }
 async function createUser(payload) {
   const res = await fetch(`${API}/users`, {
-    method: 'POST', headers: { 'Content-Type':'application/json', ...authHeader() },
+    method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeader() },
     body: JSON.stringify(payload)
   });
   if (!res.ok) throw new Error('Falha ao criar usuário');
@@ -669,7 +782,7 @@ async function createUser(payload) {
 }
 async function updateUser(id, payload) {
   const res = await fetch(`${API}/users/${id}`, {
-    method: 'PUT', headers: { 'Content-Type':'application/json', ...authHeader() },
+    method: 'PUT', headers: { 'Content-Type': 'application/json', ...authHeader() },
     body: JSON.stringify(payload)
   });
   if (!res.ok) throw new Error('Falha ao atualizar usuário');
@@ -712,6 +825,12 @@ document.addEventListener('DOMContentLoaded', renderAuthArea);
 if (document.getElementById('editalContainer')) {
   document.addEventListener('DOMContentLoaded', initEditalDetail);
 }
+document.addEventListener('DOMContentLoaded', () => {
+  const s = document.getElementById('start_at');
+  const e = document.getElementById('end_at');
+  if (s) s.addEventListener('input', () => maskDateBR(s));
+  if (e) e.addEventListener('input', () => maskDateBR(e));
+});
 
 
 // Exporte funções no escopo global, se você as chama direto no HTML

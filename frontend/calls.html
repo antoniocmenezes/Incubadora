@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="pt-br">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -13,54 +14,121 @@
     /* =========================
        Paleta YpeTec
        ========================= */
-    :root{
-      --brand-yellow:#ffd400;
-      --brand-yellow-600:#f2c200;
-      --brand-yellow-700:#e3b400;
-      --brand-black:#0a0a0a;
-      --ink-1:#0b0f19;
-      --ink-2:#1f2937;
-      --ink-3:#4b5563;
-      --ring:rgba(10,10,10,.10);
-      --surface:#fff;
+    :root {
+      --brand-yellow: #ffd400;
+      --brand-yellow-600: #f2c200;
+      --brand-yellow-700: #e3b400;
+      --brand-black: #0a0a0a;
+      --ink-1: #0b0f19;
+      --ink-2: #1f2937;
+      --ink-3: #4b5563;
+      --ring: rgba(10, 10, 10, .10);
+      --surface: #fff;
     }
 
-    body{
-      background:#fff;
-      color:var(--ink-2);
+    body {
+      background: #fff;
+      color: var(--ink-2);
       background-image:
-        radial-gradient(900px 600px at 12% 10%, rgba(255,212,0,.10), transparent 60%),
-        radial-gradient(900px 600px at 90% -10%, rgba(0,0,0,.05), transparent 55%);
+        radial-gradient(900px 600px at 12% 10%, rgba(255, 212, 0, .10), transparent 60%),
+        radial-gradient(900px 600px at 90% -10%, rgba(0, 0, 0, .05), transparent 55%);
       background-attachment: fixed;
     }
 
-    h1,h2,h3,h4,h5,h6 { color: var(--ink-1); }
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      color: var(--ink-1);
+    }
 
     /* Navbar */
-    .navbar{ background: var(--brand-black) !important; border-bottom: 3px solid var(--brand-yellow); }
-    .navbar .nav-link, .navbar .navbar-brand{ color:#fff !important; }
-    .navbar .nav-link:hover{ color:var(--brand-yellow) !important; }
-    .btn-login{ background:var(--brand-yellow); color:#111 !important; font-weight:600; border:0; }
+    .navbar {
+      background: var(--brand-black) !important;
+      border-bottom: 3px solid var(--brand-yellow);
+    }
+
+    .navbar .nav-link,
+    .navbar .navbar-brand {
+      color: #fff !important;
+    }
+
+    .navbar .nav-link:hover {
+      color: var(--brand-yellow) !important;
+    }
+
+    .btn-login {
+      background: var(--brand-yellow);
+      color: #111 !important;
+      font-weight: 600;
+      border: 0;
+    }
 
     /* Glass/Card */
-    .glass{ background:var(--surface); border:1px solid var(--ring); border-radius:16px; }
-    .card-elev{ transition:.25s; }
-    .card-elev:hover{ transform:translateY(-2px); box-shadow:0 16px 40px rgba(0,0,0,.1); }
+    .glass {
+      background: var(--surface);
+      border: 1px solid var(--ring);
+      border-radius: 16px;
+    }
+
+    .card-elev {
+      transition: .25s;
+    }
+
+    .card-elev:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, .1);
+    }
 
     /* Botões */
-    .btn-brand{
-      background:linear-gradient(90deg,var(--brand-yellow),var(--brand-yellow-600));
-      color:#111; font-weight:700; border:0;
+    .btn-brand {
+      background: linear-gradient(90deg, var(--brand-yellow), var(--brand-yellow-600));
+      color: #111;
+      font-weight: 700;
+      border: 0;
     }
-    .btn-brand:hover{ background:linear-gradient(90deg,var(--brand-yellow-600),var(--brand-yellow-700)); }
-    .btn-ghost{
-      border:2px solid var(--brand-black); color:var(--brand-black); font-weight:700;
-    }
-    .btn-ghost:hover{ background:var(--brand-black); color:#fff; }
 
-    footer{ border-top:1px solid var(--ring); color:var(--ink-3); }
+    .btn-brand:hover {
+      background: linear-gradient(90deg, var(--brand-yellow-600), var(--brand-yellow-700));
+    }
+
+    .btn-ghost {
+      border: 2px solid var(--brand-black);
+      color: var(--brand-black);
+      font-weight: 700;
+    }
+
+    .btn-ghost:hover {
+      background: var(--brand-black);
+      color: #fff;
+    }
+
+    footer {
+      border-top: 1px solid var(--ring);
+      color: var(--ink-3);
+    }
+
+    #callMsg {
+      font-weight: 600;
+      color: var(--brand-yellow-700);
+      text-shadow: 0 0 3px rgba(0, 0, 0, 0.15);
+      transition: opacity .3s ease;
+    }
+
+    #callMsg.text-success {
+      color: #198754;
+      /* verde Bootstrap */
+    }
+
+    #callMsg.text-danger {
+      color: #dc3545;
+      /* vermelho Bootstrap */
+    }
   </style>
 </head>
+
 <body>
 
   <!-- NAVBAR -->
@@ -74,28 +142,28 @@
       </button>
       <div class="collapse navbar-collapse" id="navMain">
         <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-  <li class="nav-item" data-admin-only style="display:none;">
-    <a class="nav-link" href="users.html">
-      <i class="bi bi-people-gear me-1"></i> Gerenciar Usuários
-    </a>
-  </li>
+          <li class="nav-item" data-admin-only style="display:none;">
+            <a class="nav-link" href="users.html">
+              <i class="bi bi-people-gear me-1"></i> Gerenciar Usuários
+            </a>
+          </li>
 
-  <!-- Slots dinâmicos -->
-  <li id="studentNav" class="nav-item d-none"></li>
-  <li id="evalNav" class="nav-item d-none"></li>
+          <!-- Slots dinâmicos -->
+          <li id="studentNav" class="nav-item d-none"></li>
+          <li id="evalNav" class="nav-item d-none"></li>
 
-  <li class="nav-item"><a class="nav-link" href="#editais"><i class="bi bi-megaphone"></i> Editais</a></li>
-  <li class="nav-item"><a class="nav-link" href="#aprovados"><i class="bi bi-stars"></i> Aprovados</a></li>
-  <li class="nav-item"><a class="nav-link" href="#sobre"><i class="bi bi-info-circle"></i> Sobre</a></li>
+          <li class="nav-item"><a class="nav-link" href="#editais"><i class="bi bi-megaphone"></i> Editais</a></li>
+          <li class="nav-item"><a class="nav-link" href="#aprovados"><i class="bi bi-stars"></i> Aprovados</a></li>
+          <li class="nav-item"><a class="nav-link" href="#sobre"><i class="bi bi-info-circle"></i> Sobre</a></li>
 
-  <!-- Área dinâmica de autenticação -->
-  <li class="nav-item ms-lg-3" id="authArea">
-    <a href="login.html" class="btn btn-login btn-sm px-3">
-      <i class="bi bi-box-arrow-in-right"></i> Entrar
-    </a>
-  </li>
-  <li class="nav-item ms-lg-3" id="authArea2"></li>
-</ul>
+          <!-- Área dinâmica de autenticação -->
+          <li class="nav-item ms-lg-3" id="authArea">
+            <a href="login.html" class="btn btn-login btn-sm px-3">
+              <i class="bi bi-box-arrow-in-right"></i> Entrar
+            </a>
+          </li>
+          <li class="nav-item ms-lg-3" id="authArea2"></li>
+        </ul>
       </div>
     </div>
   </nav>
@@ -115,8 +183,8 @@
   <main class="py-4">
     <div class="container">
       <div id="callAlert" class="alert d-none" role="alert"></div>
-      <div class="glass card-elev p-4 p-lg-5">
-        <form id="callForm" class="row g-3 needs-validation" novalidate>
+      <div class="glass card-elev p-4 p-lg-5" id="callContainer">
+        <form id="callForm" class="row g-3 " novalidate>
           <div class="col-12">
             <label class="form-label" for="title">Título *</label>
             <input id="title" class="form-control" name="title" required>
@@ -127,16 +195,22 @@
           </div>
           <div class="col-md-6">
             <label class="form-label" for="start_at">Início *</label>
-            <input id="start_at" type="datetime-local" class="form-control" name="start_at" required>
+            <input id="start_at" name="start_at" type="text" class="form-control" placeholder="dd/mm/aaaa"
+              inputmode="numeric" autocomplete="off" maxlength="10" required />
+            <div class="form-text">Formato: dd/mm/aaaa</div>
           </div>
+
           <div class="col-md-6">
             <label class="form-label" for="end_at">Fim *</label>
-            <input id="end_at" type="datetime-local" class="form-control" name="end_at" required>
+            <input id="end_at" name="end_at" type="text" class="form-control" placeholder="dd/mm/aaaa"
+              inputmode="numeric" autocomplete="off" maxlength="10" required />
+            <div class="form-text">Formato: dd/mm/aaaa</div>
           </div>
+
           <div class="col-12 d-flex gap-2">
             <button class="btn btn-brand" type="submit"><i class="bi bi-megaphone"></i> Publicar</button>
             <button class="btn btn-ghost" type="reset"><i class="bi bi-eraser"></i> Limpar</button>
-            <span id="callMsg" class="ms-auto text-success fw-semibold"></span>
+            <span id="callMsg" class="ms-auto d-inline-flex align-items-center"></span>
           </div>
         </form>
       </div>
@@ -171,4 +245,5 @@
     if (typeof bindPublishCall === 'function') bindPublishCall();
   </script>
 </body>
+
 </html>
