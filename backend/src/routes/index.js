@@ -16,6 +16,15 @@ import {
   updateUserCtrl, deleteUserCtrl, usersReportCtrl
 } from '../controllers/usersController.js';
 
+import {
+  createMentorshipCtrl,
+  listMyMentorshipsCtrl,
+  listAllMentorshipsCtrl,
+  updateMentorshipStatusCtrl
+} from '../controllers/mentorshipController.js';
+import { listMyIncubatedProjectsCtrl } from '../controllers/projectsController.js';
+
+
 // middlewares
 import { authRequired, requireRole } from '../middlewares/auth.js';
 import { uploadLogo } from '../middlewares/upload.js';
@@ -97,6 +106,36 @@ router.post('/auth/reset', resetPassword);
 router.get('/students/me/projects',
   authRequired, requireRole('ALUNO'),
   listMyProjectsCtrl
+);
+// ========= Mentorias =========
+// Dropdown do aluno: projetos incubados
+router.get('/students/me/incubated-projects',
+  authRequired, requireRole('ALUNO'),
+  listMyIncubatedProjectsCtrl
+);
+
+// Aluno cria solicitação
+router.post('/mentorship-requests',
+  authRequired, requireRole('ALUNO'),
+  createMentorshipCtrl
+);
+
+// Aluno lista as suas solicitações
+router.get('/mentorship-requests/mine',
+  authRequired, requireRole('ALUNO'),
+  listMyMentorshipsCtrl
+);
+
+// Admin lista todas
+router.get('/mentorship-requests',
+  authRequired, requireRole('ADMIN'),
+  listAllMentorshipsCtrl
+);
+
+// Admin atualiza status
+router.patch('/mentorship-requests/:id/status',
+  authRequired, requireRole('ADMIN'),
+  updateMentorshipStatusCtrl
 );
 
 

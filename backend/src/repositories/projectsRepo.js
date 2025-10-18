@@ -132,3 +132,15 @@ export async function markProjectAsDisengaged(projectId, userId, reason = null) 
   );
   return result.affectedRows > 0;
 }
+
+export async function getMyIncubatedProjects(userId) {
+  const [rows] = await pool.query(
+    `SELECT id, title 
+       FROM projects 
+      WHERE owner_user_id = ? 
+        AND status = 'INCUBADO'
+      ORDER BY title ASC`,
+    [userId]
+  );
+  return rows;
+}

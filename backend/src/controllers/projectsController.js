@@ -1,4 +1,5 @@
 import { createProject, getStudentProjects, isProjectOwnedByUser, markProjectAsDisengaged } from '../repositories/projectsRepo.js';
+import { getMyIncubatedProjects } from '../repositories/projectsRepo.js';
 
 export async function createProjectCtrl(req, res) {
   const { title, summary, area, team = [] } = req.body;
@@ -55,5 +56,17 @@ export async function requestDisengagementCtrl(req, res) {
   } catch (e) {
     console.error('requestDisengagementCtrl error:', e);
     return res.status(500).json({ message: 'Erro interno ao solicitar desligamento.' });
+  }
+}
+
+
+
+export async function listMyIncubatedProjectsCtrl(req, res) {
+  try {
+    const rows = await getMyIncubatedProjects(req.user.id);
+    res.json(rows);
+  } catch (e) {
+    console.error('listMyIncubatedProjectsCtrl error:', e);
+    res.status(500).json({ error: 'Erro ao carregar seus projetos incubados' });
   }
 }

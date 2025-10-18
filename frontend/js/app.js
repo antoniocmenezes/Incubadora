@@ -37,7 +37,6 @@ function currentUser() {
 }
 
 
-// injeta / remove o botão "Avaliar" na navbar conforme o papel
 function injectAdminNav() {
   const slot = document.getElementById('evalNav');
   if (!slot) return;
@@ -45,16 +44,30 @@ function injectAdminNav() {
 
   if (u?.role === 'ADMIN') {
     slot.classList.remove('d-none');
+
+    const isEval   = isActivePage('evaluations.html') ? 'active' : '';
+    const isMent   = isActivePage('mentorship_admin.html') ? 'active' : '';
+    const isUsers  = isActivePage('users.html') ? 'active' : '';
+
     slot.innerHTML = `
-      <a class="nav-link" href="evaluations.html" title="Avaliar projetos">
-        <i class="bi bi-clipboard-check"></i> Avaliar Projeto
-      </a>
+      <div class="d-flex align-items-center flex-wrap gap-2">
+        <a class="nav-link ${isEval}" href="evaluations.html" title="Avaliar projetos">
+          <i class="bi bi-clipboard-check"></i> Avaliar Projeto
+        </a>
+        <a class="nav-link ${isMent}" href="mentorship_admin.html" title="Solicitações de Mentoria">
+          <i class="bi bi-people"></i> Solicitações de Mentoria
+        </a>
+        <a class="nav-link ${isUsers}" href="users.html" title="Gerenciar usuários">
+          <i class="bi bi-person-circle"></i> Gerenciar Usuários
+        </a>
+      </div>
     `;
   } else {
     slot.classList.add('d-none');
     slot.innerHTML = '';
   }
 }
+
 
 function injectStudentNav() {
   const u = currentUser();
@@ -64,11 +77,20 @@ function injectStudentNav() {
   if (slot) {
     if (u?.role === 'ALUNO') {
       slot.classList.remove('d-none');
-      const active = isActivePage('my_projects.html') ? 'active' : '';
+
+      const isMyProj  = isActivePage('my_projects.html') ? 'active' : '';
+      const isMentReq = isActivePage('mentorship_request.html') ? 'active' : '';
+
+      // agora há DOIS links lado a lado: Meus Projetos + Solicitar Mentoria
       slot.innerHTML = `
-        <a class="nav-link ${active}" href="my_projects.html" title="Ver meus projetos">
-          <i class="bi bi-kanban"></i> Meus Projetos
-        </a>
+        <div class="d-flex align-items-center">
+          <a class="nav-link ${isMyProj}" href="my_projects.html" title="Ver meus projetos">
+            <i class="bi bi-kanban"></i> Meus Projetos
+          </a>
+          <a class="nav-link ${isMentReq}" href="mentorship_request.html" title="Solicitar mentoria">
+            <i class="bi bi-people"></i> Solicitar Mentoria
+          </a>
+        </div>
       `;
     } else {
       slot.classList.add('d-none');
@@ -77,25 +99,41 @@ function injectStudentNav() {
     return; // já resolveu via slot
   }
 
-  // Plano B: append no primeiro .navbar-nav encontrado
+  // ===== Plano B: append no primeiro .navbar-nav encontrado =====
   const nav = document.querySelector('#navMain .navbar-nav, #mainNav .navbar-nav, nav .navbar-nav');
   if (!nav) return;
 
   // Evitar duplicação
-  if (nav.querySelector('[data-nav="my-projects"]')) return;
+  const alreadyMy   = nav.querySelector('[data-nav="my-projects"]');
+  const alreadyMent = nav.querySelector('[data-nav="mentorship-request"]');
 
   if (u?.role === 'ALUNO') {
-    const li = document.createElement('li');
-    li.className = 'nav-item';
-    li.dataset.nav = 'my-projects';
-    const active = isActivePage('my_projects.html') ? 'active' : '';
-    li.innerHTML = `
-      <a class="nav-link ${active}" href="my_projects.html">
-        <i class="bi bi-kanban"></i> Meus Projetos
-      </a>`;
-    nav.appendChild(li);
+    if (!alreadyMy) {
+      const li = document.createElement('li');
+      li.className = 'nav-item';
+      li.dataset.nav = 'my-projects';
+      const active = isActivePage('my_projects.html') ? 'active' : '';
+      li.innerHTML = `
+        <a class="nav-link ${active}" href="my_projects.html">
+          <i class="bi bi-kanban"></i> Meus Projetos
+        </a>`;
+      nav.appendChild(li);
+    }
+
+    if (!alreadyMent) {
+      const li2 = document.createElement('li');
+      li2.className = 'nav-item';
+      li2.dataset.nav = 'mentorship-request';
+      const active2 = isActivePage('mentorship_request.html') ? 'active' : '';
+      li2.innerHTML = `
+        <a class="nav-link ${active2}" href="mentorship_request.html">
+          <i class="bi bi-people"></i> Solicitar Mentoria
+        </a>`;
+      nav.appendChild(li2);
+    }
   }
 }
+
 
 function isActivePage(fileName) {
   const p = (location.pathname || '').toLowerCase();
@@ -958,6 +996,48 @@ async function loadMyProjects() {
     if (listBox) listBox.innerHTML = '';
   }
 }
+
+// ====== MENTORIAS (API) ======
+async function apiListMyIncubatedProjects() {
+  const res = await fetch(`${API}/students/me/incubated-projects`, { headers: authHeader() });
+  if (!res.ok) throw new Error('Falha ao listar seus projetos incubados');
+  return res.json();
+}
+
+async function apiCreateMentorshipRequest(payload) {
+  const res = await fetch(`${API}/mentorship-requests`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.error || 'Falha ao solicitar mentoria');
+  return data;
+}
+
+async function apiListMentorshipRequests() { // ADMIN
+  const res = await fetch(`${API}/mentorship-requests`, { headers: authHeader() });
+  if (!res.ok) throw new Error('Falha ao carregar solicitações');
+  return res.json();
+}
+
+async function apiUpdateMentorshipStatus(id, status) { // ADMIN
+  const res = await fetch(`${API}/mentorship-requests/${id}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    body: JSON.stringify({ status })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.error || 'Falha ao atualizar status');
+  return data;
+}
+
+// expõe global
+window.apiListMyIncubatedProjects = apiListMyIncubatedProjects;
+window.apiCreateMentorshipRequest = apiCreateMentorshipRequest;
+window.apiListMentorshipRequests = apiListMentorshipRequests;
+window.apiUpdateMentorshipStatus = apiUpdateMentorshipStatus;
+
 
 // exporta para ser usado pela página
 window.loadMyProjects = loadMyProjects;

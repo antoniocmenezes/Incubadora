@@ -197,7 +197,7 @@
   <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg sticky-top">
     <div class="container py-2">
-      <a class="navbar-brand d-flex align-items-center" href="#">
+      <a class="navbar-brand d-flex align-items-center" href="index.html">
         <img src="img/logo.png" alt="YpeTec" height="60" class="d-inline-block">
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"
@@ -206,28 +206,22 @@
       </button>
       <div class="collapse navbar-collapse" id="navMain">
         <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-  <li class="nav-item" data-admin-only style="display:none;">
-    <a class="nav-link" href="users.html">
-      <i class="bi bi-people-gear me-1"></i> Gerenciar Usuários
-    </a>
-  </li>
+          <!-- Slots dinâmicos -->
+          <li id="studentNav" class="nav-item d-none"></li>
+          <li id="evalNav" class="nav-item d-none"></li>
 
-  <!-- Slots dinâmicos -->
-  <li id="studentNav" class="nav-item d-none"></li>
-  <li id="evalNav" class="nav-item d-none"></li>
+          <li class="nav-item"><a class="nav-link" href="#editais"><i class="bi bi-megaphone"></i> Editais</a></li>
+          <li class="nav-item"><a class="nav-link" href="#aprovados"><i class="bi bi-stars"></i> Aprovados</a></li>
+          <li class="nav-item"><a class="nav-link" href="#sobre"><i class="bi bi-info-circle"></i> Sobre</a></li>
 
-  <li class="nav-item"><a class="nav-link" href="#editais"><i class="bi bi-megaphone"></i> Editais</a></li>
-  <li class="nav-item"><a class="nav-link" href="#aprovados"><i class="bi bi-stars"></i> Aprovados</a></li>
-  <li class="nav-item"><a class="nav-link" href="#sobre"><i class="bi bi-info-circle"></i> Sobre</a></li>
-
-  <!-- Área dinâmica de autenticação -->
-  <li class="nav-item ms-lg-3" id="authArea">
-    <a href="login.html" class="btn btn-login btn-sm px-3">
-      <i class="bi bi-box-arrow-in-right"></i> Entrar
-    </a>
-  </li>
-  <li class="nav-item ms-lg-3" id="authArea2"></li>
-</ul>
+          <!-- Área dinâmica de autenticação -->
+          <li class="nav-item ms-lg-3" id="authArea">
+            <a href="login.html" class="btn btn-login btn-sm px-3">
+              <i class="bi bi-box-arrow-in-right"></i> Entrar
+            </a>
+          </li>
+          <li class="nav-item ms-lg-3" id="authArea2"></li>
+        </ul>
       </div>
     </div>
   </nav>
@@ -447,15 +441,15 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="js/app.js"></script>
   <script>
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    const me = await window.me(); // função nova no app.js (abaixo)
-    if (me?.role === 'ADMIN') {
-      document.querySelectorAll('[data-admin-only]').forEach(el => el.style.display = '');
-    }
-  } catch(e) { /* silencia */ }
-});
-</script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const me = await window.me(); // função nova no app.js (abaixo)
+        if (me?.role === 'ADMIN') {
+          document.querySelectorAll('[data-admin-only]').forEach(el => el.style.display = '');
+        }
+      } catch (e) { /* silencia */ }
+    });
+  </script>
 
   <script>
     function initIndex() {
