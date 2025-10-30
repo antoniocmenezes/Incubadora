@@ -161,14 +161,17 @@
     <div class="container">
       <div class="row g-4">
         <!-- Formulário -->
-        <div class="col-lg-8">
-          <div class="glass card-elev p-4 p-lg-5">
-            <form id="pubForm" class="row g-4" enctype="multipart/form-data">
-              <div class="col-md-4">
-                <label class="form-label fw-semibold">ID do Projeto</label>
-                <input name="project_id" class="form-control" required placeholder="Ex.: 123" />
-                <div class="form-text">Se você veio da tela de avaliações, este campo pode ser preenchido automaticamente.</div>
-              </div>
+        <!-- Formulário -->
+<div class="col-lg-8">
+  <div class="glass card-elev p-4 p-lg-5">
+    <form id="pubForm" class="row g-4" enctype="multipart/form-data">
+      <!-- Campo oculto -->
+      <div class="col-md-4" style="display:none;">
+        <label class="form-label fw-semibold">ID do Projeto</label>
+        <input name="project_id" class="form-control" required placeholder="Ex.: 123" />
+        <div class="form-text">Se você veio da tela de avaliações, este campo pode ser preenchido automaticamente.</div>
+      </div>
+
 
               <div class="col-md-8">
                 <label class="form-label fw-semibold">Descrição pública</label>

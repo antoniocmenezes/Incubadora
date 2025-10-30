@@ -120,7 +120,7 @@ export async function isProjectOwnedByUser(projectId, userId) {
 
 // Soft delete: DESLIGADO + deleted_at = NOW()
 // Permita desligar quando fizer sentido no seu fluxo (ex.: INCUBADO/APROVADO)
-export async function markProjectAsDisengaged(projectId, userId, reason = null) {
+export async function markProjectAsDisengaged(projectId, userId) {
   const [result] = await pool.query(
     `UPDATE projects
        SET status = 'DESLIGADO',
@@ -144,3 +144,50 @@ export async function getMyIncubatedProjects(userId) {
   );
   return rows;
 }
+
+// NO TOPO já existe: import { pool } from '../config/db.js';
+
+export async function findAllWithRelations() {
+  const [rows] = await pool.query(`
+    SELECT
+      p.id                              AS project_id,
+      p.title                           AS project_title,
+      p.summary                         AS project_summary,
+      p.area                            AS project_area,
+      p.status                          AS project_status,
+      p.owner_user_id,
+      u.name                            AS owner_name,
+
+      s.id                              AS submission_id,
+      s.call_id,
+      s.status                          AS submission_status,
+      s.submitted_at,
+
+      c.title                           AS call_title,
+
+      e.id                              AS evaluation_id,
+      e.status                          AS evaluation_status,
+      e.comments                        AS evaluation_comments,
+      e.evaluated_at
+
+    FROM projects p
+    LEFT JOIN users u        ON u.id = p.owner_user_id
+    LEFT JOIN submissions s  ON s.project_id = p.id
+    LEFT JOIN calls c        ON c.id = s.call_id
+    LEFT JOIN (
+      SELECT e1.*
+      FROM evaluations e1
+      INNER JOIN (
+        SELECT submission_id, MAX(evaluated_at) AS max_eval
+        FROM evaluations
+        GROUP BY submission_id
+      ) t ON t.submission_id = e1.submission_id AND t.max_eval = e1.evaluated_at
+    ) e ON e.submission_id = s.id
+
+    ORDER BY p.id DESC, s.submitted_at DESC
+  `);
+
+  return rows;
+}
+
+

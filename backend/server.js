@@ -1,19 +1,12 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import router from './src/routes/index.js';
-import path from 'path';
+// backend/server.js (ESM)
+import 'dotenv/config';
+import app from './src/app.js';
 
-dotenv.config();
-const app = express();
+const PORT = process.env.PORT || 3001;
 
-app.use(cors());
-app.use(express.json());
+// Em testes, o Jest importa o app (NODE_ENV=test) e não precisa abrir porta
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => console.log(`API on http://localhost:${PORT}`));
+}
 
-app.get('/health', (_req, res) => res.json({ ok: true }));
-app.use('/api', router);
-
-const port = process.env.PORT || 3001;
-app.listen(port, () => console.log(`API rodando na porta ${port}`));
-
-app.use('/uploads', express.static(path.resolve('uploads')));
+export default app;

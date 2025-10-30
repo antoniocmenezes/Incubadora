@@ -202,8 +202,6 @@
             <option value="">Todos os perfis</option>
             <option value="ADMIN">Administrador</option>
             <option value="ALUNO">Aluno</option>
-            <option value="MENTOR">Mentor</option>
-            <option value="INVESTIDOR">Investidor</option>
           </select>
         </div>
         <div class="col-auto">
@@ -240,7 +238,7 @@
           </div>
           <div class="mb-2">
             <label class="form-label">CPF</label>
-            <input class="form-control" id="userCpf" required/>
+            <input class="form-control" id="userCpf" maxlength="11" required/>
           </div>
           <div class="mb-2">
             <label class="form-label">Email</label>
@@ -362,7 +360,6 @@
       window.downloadUsersReport(role || undefined);
     }
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     renderAuthArea();   // monta login/logout

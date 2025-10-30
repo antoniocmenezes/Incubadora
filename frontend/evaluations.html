@@ -182,22 +182,30 @@
   </nav>
 
   <!-- HEADER -->
-  <header class="py-4 border-bottom" style="border-color:var(--ring)!important;">
-    <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3">
-      <div>
-        <h1 class="h3 mb-1">Avaliar Projetos</h1>
-        <p class="text-ink-3 mb-0">Atribua status e comentários às submissões recebidas.</p>
-      </div>
-      <div class="filters d-flex align-items-center gap-2">
-        <select id="statusFilter" class="form-select form-select-sm">
-          <option value="all">Todas as submissões</option>
-          <option value="pending">Pendentes</option>
-          <option value="evaluated">Já avaliadas</option>
-        </select>
-        <button id="refreshBtn" class="btn btn-ghost btn-sm"><i class="bi bi-arrow-clockwise"></i> Atualizar</button>
-      </div>
+  <!-- HEADER -->
+<header class="py-4 border-bottom" style="border-color:var(--ring)!important;">
+  <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <div>
+      <h1 class="h3 mb-1">Avaliar Projetos</h1>
+      <p class="text-ink-3 mb-0">Atribua status e comentários às submissões recebidas.</p>
     </div>
-  </header>
+
+    <!-- Filtros e botão alinhados -->
+    <div class="filters d-flex align-items-center gap-2 flex-wrap">
+      <select id="statusFilter" class="form-select form-select-sm">
+        <option value="all">Todas as submissões</option>
+        <option value="pending">Pendentes</option>
+        <option value="evaluated">Já avaliadas</option>
+      </select>
+      <button id="refreshBtn" class="btn btn-ghost btn-sm">
+        <i class="bi bi-arrow-clockwise"></i> Atualizar
+      </button>
+      <button id="reportBtn" class="btn btn-brand btn-sm">
+        <i class="bi bi-file-earmark-arrow-down"></i> Emitir Relatório
+      </button>
+    </div>
+  </div>
+</header>
 
   <!-- GRID DE CARDS -->
   <main class="py-4">
@@ -464,6 +472,56 @@ if (details) {
   `;
 }
 
+document.getElementById('reportBtn')?.addEventListener('click', async () => {
+    try {
+      // lê o filtro atual da UI
+      const sel = document.getElementById('statusFilter');
+      const filter = (sel?.value || 'all');
+
+      // usa o MESMO endpoint da listagem com o MESMO filtro
+      let url = `${API}/submissions`;
+      if (filter === 'pending')   url = `${API}/submissions?status=pending`;
+      if (filter === 'evaluated') url = `${API}/submissions?status=evaluated`;
+
+      const res = await fetch(url, { headers: { ...authHeader() } });
+      if (!res.ok) throw new Error('Erro ao gerar relatório');
+      const data = await res.json();
+      const items = Array.isArray(data) ? data : (data.items || []);
+
+      // monta CSV com colunas fixas (ordem estável)
+      const headers = [
+        'submission_id','project_id','project_title','project_area','submission_status',
+        'evaluation_status','evaluation_comments','evaluation_date','call_id','submitted_at'
+      ];
+      const rows = [headers.join(';')];
+
+      for (const it of items) {
+        rows.push([
+          it.id,
+          it.project_id,
+          (it.project_title ?? ''),
+          (it.project_area ?? ''),
+          (it.submission_status ?? ''),
+          (it.evaluation_status ?? ''),
+          (it.evaluation_comments ?? '').replace(/\r?\n/g, ' '),
+          it.evaluation_date ? new Date(it.evaluation_date).toISOString() : '',
+          it.call_id ?? '',
+          it.submitted_at ? new Date(it.submitted_at).toISOString() : ''
+        ].map(v => JSON.stringify(v ?? '')).join(';'));
+      }
+
+      const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+      const urlBlob = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = urlBlob;
+      a.download = `relatorio_submissoes_${filter}.csv`;
+      a.click();
+      URL.revokeObjectURL(urlBlob);
+    } catch (err) {
+      console.error(err);
+      showAlert('danger', 'Falha ao emitir relatório.');
+    }
+  });
 
   </script>
 </body>

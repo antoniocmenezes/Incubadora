@@ -16,6 +16,7 @@ import {
   updateUserCtrl, deleteUserCtrl, usersReportCtrl
 } from '../controllers/usersController.js';
 
+import { exportProjectsReportCtrl } from '../controllers/projectsController.js';
 import {
   createMentorshipCtrl,
   listMyMentorshipsCtrl,
@@ -136,6 +137,11 @@ router.get('/mentorship-requests',
 router.patch('/mentorship-requests/:id/status',
   authRequired, requireRole('ADMIN'),
   updateMentorshipStatusCtrl
+);
+
+router.get('/projects/report',
+  authRequired, requireRole('ADMIN'),
+  exportProjectsReportCtrl
 );
 
 

@@ -10,7 +10,6 @@ export async function submitProject({ project_id, call_id }) {
 
 // NOVO
 export async function listSubmissions({ status = 'all' } = {}) {
-  // le = last_evaluation (última avaliação por submissão)
   const sql = `
     WITH last_eval AS (
       SELECT *
@@ -31,21 +30,25 @@ export async function listSubmissions({ status = 'all' } = {}) {
       p.title            AS project_title,
       p.summary          AS project_summary,
       p.area             AS project_area,
+      p.status           AS project_status,   -- importante para o front saber
       le.status          AS evaluation_status,
       le.comments        AS evaluation_comments,
       le.evaluated_at    AS evaluation_date
     FROM submissions s
     JOIN projects p          ON p.id = s.project_id
     LEFT JOIN last_eval le   ON le.submission_id = s.id
-    /**WHERE_CLAUSE**/
+    WHERE p.status <> 'DESLIGADO'
+    /**AND_WHERE_CLAUSE**/
     ORDER BY s.submitted_at DESC, s.id DESC
   `;
 
   const where = [];
-  if (status === 'pending')      where.push('le.id IS NULL');      // sem avaliação
-  else if (status === 'evaluated') where.push('le.id IS NOT NULL'); // já avaliadas
+  if (status === 'pending')      where.push('le.id IS NULL');
+  else if (status === 'evaluated') where.push('le.id IS NOT NULL');
 
-  const finalSql = sql.replace('/**WHERE_CLAUSE**/', where.length ? `WHERE ${where.join(' AND ')}` : '');
+  const whereClause = where.length ? ` AND ${where.join(' AND ')}` : '';
+  const finalSql = sql.replace('/**AND_WHERE_CLAUSE**/', whereClause);
   const [rows] = await pool.query(finalSql);
   return rows;
 }
+

@@ -1,4 +1,4 @@
-import { createProject, getStudentProjects, isProjectOwnedByUser, markProjectAsDisengaged } from '../repositories/projectsRepo.js';
+import { createProject, getStudentProjects, isProjectOwnedByUser, markProjectAsDisengaged,findAllWithRelations } from '../repositories/projectsRepo.js';
 import { getMyIncubatedProjects } from '../repositories/projectsRepo.js';
 
 export async function createProjectCtrl(req, res) {
@@ -68,5 +68,15 @@ export async function listMyIncubatedProjectsCtrl(req, res) {
   } catch (e) {
     console.error('listMyIncubatedProjectsCtrl error:', e);
     res.status(500).json({ error: 'Erro ao carregar seus projetos incubados' });
+  }
+}
+
+export async function exportProjectsReportCtrl(req, res) {
+  try {
+    const projects = await findAllWithRelations(); // agora vem do repo importado
+    return res.json(projects);
+  } catch (err) {
+    console.error('exportProjectsReportCtrl error:', err);
+    return res.status(500).json({ error: 'Erro ao gerar relatório de projetos' });
   }
 }
