@@ -1,5 +1,5 @@
 // ================== CONFIG ==================
-const API = 'http://localhost:3001/api';
+const API = 'incubadora-production.up.railway.app/api';
 
 // ================== AUTH STORAGE ==================
 function token() { return localStorage.getItem('token'); }
