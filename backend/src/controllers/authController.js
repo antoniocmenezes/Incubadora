@@ -4,7 +4,9 @@ import jwt from 'jsonwebtoken';
 import { findUserByCPF, findUserByEmail, createUser } from '../repositories/usersRepo.js';
 import crypto from 'crypto';
 import { pool } from '../config/db.js';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 
 // ============== LOGIN ==============
 export async function login(req, res) {
@@ -68,15 +70,7 @@ export async function register(req, res) {
 }
 
 // ============ EMAIL =============
-function transporter() {
-  if (!process.env.SMTP_HOST) return null; // DEV: sem SMTP
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: false,
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
-  });
-}
+
 
 // ======= FORGOT PASSWORD ========
 export async function forgotPassword(req, res) {
@@ -85,7 +79,7 @@ export async function forgotPassword(req, res) {
     if (!cpfOrEmail) return res.status(400).json({ message: 'Informe CPF ou e-mail.' });
 
     const isEmail = cpfOrEmail.includes('@');
-    const value = isEmail ? cpfOrEmail.toLowerCase().trim() : cpfOrEmail.replace(/\D/g,'');
+    const value = isEmail ? cpfOrEmail.toLowerCase().trim() : cpfOrEmail.replace(/\D/g, '');
 
     const [rows] = await pool.query(
       isEmail
@@ -95,7 +89,9 @@ export async function forgotPassword(req, res) {
     );
 
     // Resposta indistinguível por segurança
-    if (!rows.length) return res.json({ ok: true, message: 'Se existir conta, enviaremos instruções por e-mail.' });
+    if (!rows.length) {
+      return res.json({ ok: true, message: 'Se existir conta, enviaremos instruções por e-mail.' });
+    }
 
     const user = rows[0];
     const token = crypto.randomBytes(32).toString('hex');
@@ -108,28 +104,33 @@ export async function forgotPassword(req, res) {
     );
 
     const link = `${process.env.APP_URL || 'http://localhost:3000'}/reset.html?token=${token}`;
-    const tx = transporter();
 
-    if (tx && user.email) {
-      await tx.sendMail({
-        from: process.env.MAIL_FROM || 'no-reply@ypetec.com.br',
-        to: user.email,
-        subject: 'Recuperação de senha - YpeTec',
-        html: `
-          <p>Olá ${user.name || ''},</p>
-          <p>Para redefinir sua senha, use o link abaixo (válido por ${ttlMin} minutos):</p>
-          <p><a href="${link}">${link}</a></p>
-          <p>Se não foi você, ignore esta mensagem.</p>
-        `
-      });
-    } else {
-      console.log('[RESET LINK DEV]:', link);
+    try {
+      if (user.email) {
+        await resend.emails.send({
+          from: process.env.MAIL_FROM, // ex.: "Incubadora UniRV <noreply@ypetec.com>"
+          to: user.email,
+          subject: 'Recuperação de senha - YpeTec',
+          html: `
+            <p>Olá ${user.name || ''},</p>
+            <p>Para redefinir sua senha, use o link abaixo (válido por ${ttlMin} minutos):</p>
+            <p><a href="${link}">${link}</a></p>
+            <p>Se não foi você, ignore esta mensagem.</p>
+          `,
+        });
+      } else {
+        // Sem e-mail cadastrado — mantém resposta genérica
+        console.log('[RESET LINK DEV]:', link);
+      }
+    } catch (err) {
+      // Falha no provedor de e-mail: loga e mantém resposta genérica
+      console.error('Falha ao enviar e-mail de reset via Resend:', err);
     }
 
     return res.json({ ok: true, message: 'Se existir conta, enviaremos instruções por e-mail.' });
   } catch (e) {
-    console.error(e);
-    return res.status(500).json({ message: 'Erro ao iniciar recuperação.' });
+    console.error('forgotPassword error:', e);
+    return res.status(500).json({ message: 'Erro ao processar solicitação de recuperação.' });
   }
 }
 
@@ -146,23 +147,20 @@ export async function resetPassword(req, res) {
     if (!rows.length) return res.status(400).json({ message: 'Link inválido ou expirado.' });
 
     const pr = rows[0];
-    const hash = await bcrypt.hash(password, 10); // usa bcryptjs
+    const hash = await bcrypt.hash(password, 10); // bcryptjs
 
-    // Atualiza a coluna correta
     await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [hash, pr.user_id]);
     await pool.query('UPDATE password_resets SET used_at = NOW() WHERE id = ?', [pr.id]);
 
     return res.json({ ok: true, message: 'Senha redefinida com sucesso.' });
   } catch (e) {
-    console.error(e);
+    console.error('resetPassword error:', e);
     return res.status(500).json({ message: 'Erro ao redefinir a senha.' });
   }
 }
 
 // ======== ME (perfil logado) ========
 export async function meCtrl(req, res) {
-  // req.user deve ser preenchido pelo middleware authRequired
-  // Se o middleware NÃO injeta email, faça uma consulta aqui (opcional).
   res.json({
     id: req.user.id,
     name: req.user.name,
@@ -170,3 +168,4 @@ export async function meCtrl(req, res) {
     role: req.user.role
   });
 }
+
